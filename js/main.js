@@ -646,8 +646,13 @@ ${servicesBullets}
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-      }).catch(err => console.log('Lead notification sent:', err));
-    } catch (e) {}
+      })
+      .then(res => res.json())
+      .then(res => console.log('Lead forwarded to Discord:', res))
+      .catch(err => console.warn('Lead notification error:', err));
+    } catch (e) {
+      console.warn('Fetch lead failed:', e);
+    }
 
     // Automatically trigger WhatsApp in new tab so owner receives it immediately
     window.open(activeWhatsAppUrl, '_blank');
@@ -672,7 +677,8 @@ ${servicesBullets}
         services: services,
         service: services.join(', '),
         frequency: document.getElementById('formFrequency')?.value || 'To be decided',
-        description: document.getElementById('formDescription')?.value || 'No additional notes'
+        description: document.getElementById('formDescription')?.value || 'No additional notes',
+        source: 'Full Booking Form (Bottom Section)'
       };
 
       handleAppointmentSubmit(data);
@@ -704,8 +710,21 @@ ${servicesBullets}
         services: services,
         service: services.join(', '),
         frequency: 'To be decided',
-        description: 'Quick request from website'
+        description: 'Quick request from website (Quick 1-Minute Estimate)',
+        source: 'Quick 1-Minute Estimate (Hero Card)'
       };
+
+      const submitBtn = heroForm.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        const origText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>✓ Request Sent!</span>';
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origText;
+        }, 3000);
+      }
+
       handleAppointmentSubmit(data);
       heroForm.reset();
       const firstHeroCb = document.querySelector('#heroServiceCheckboxes input[type="checkbox"]');

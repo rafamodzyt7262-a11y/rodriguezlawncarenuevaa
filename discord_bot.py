@@ -45,6 +45,7 @@ APP_ID = int(get_env_var("APP_ID", "1557276640650723393"))
 BOT_TOKEN = get_env_var("BOT_TOKEN", "")
 SERVER_ID = int(get_env_var("SERVER_ID", "1538269421020258304"))
 CHANNEL_ID = int(get_env_var("CHANNEL_ID", "1557277046491578379"))
+LEADS_CHANNEL_ID = int(get_env_var("LEADS_CHANNEL_ID", "1557306528078237706"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GALLERY_JSON_PATH = os.path.join(BASE_DIR, "gallery.json")

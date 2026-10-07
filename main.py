@@ -45,6 +45,7 @@ APP_ID = int(get_env_var("APP_ID", "1557276640650723393"))
 BOT_TOKEN = get_env_var("BOT_TOKEN", "")
 SERVER_ID = int(get_env_var("SERVER_ID", "1538269421020258304"))
 CHANNEL_ID = int(get_env_var("CHANNEL_ID", "1557277046491578379"))
+LEADS_CHANNEL_ID = int(get_env_var("LEADS_CHANNEL_ID", "1557306528078237706"))
 PORT = int(get_env_var("PORT", "8080"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -975,51 +976,92 @@ async def handle_gallery_json(request):
     })
 
 async def handle_lead_submission(request):
-    """Handles lead form submissions and sends instant notification to Discord."""
+    """Handles lead form submissions and sends instant notification to Discord channel 1557306528078237706."""
     global bot_global
     try:
         data = await request.json()
-        name = data.get("name", "Cliente")
-        phone = data.get("phone", "No proporcionado")
+        name = data.get("name", "Cliente").strip() or "Cliente"
+        phone = data.get("phone", "No proporcionado").strip() or "No proporcionado"
         services = data.get("services", [])
         services_str = ", ".join(services) if isinstance(services, list) else str(services)
         address = data.get("address", "Por coordinar por llamada/mensaje")
         date_val = data.get("date", "Lo antes posible")
         time_val = data.get("time", "Horario habitual")
-        source = data.get("source", "Estimado 1-Minuto (Web)")
+        frequency = data.get("frequency", "No especificada")
+        description = data.get("description", "")
+        source = data.get("source", "Quick 1-Minute Estimate (Web)")
 
-        if bot_global and bot_global.is_ready():
-            channel = bot_global.get_channel(CHANNEL_ID)
+        print(f"📥 [LEAD RECIBIDO] De: {name} | Tel: {phone} | Origen: {source}")
+
+        if bot_global:
+            if not bot_global.is_ready():
+                try:
+                    await asyncio.wait_for(bot_global.wait_until_ready(), timeout=5.0)
+                except Exception:
+                    pass
+
+            target_chan_id = LEADS_CHANNEL_ID
+            channel = bot_global.get_channel(target_chan_id)
+            if not channel and bot_global.is_ready():
+                try:
+                    channel = await bot_global.fetch_channel(target_chan_id)
+                except Exception as e:
+                    print(f"⚠️ Error obteniendo canal de leads {target_chan_id} vía fetch_channel: {e}")
+
             if channel:
-                clean_phone = "".join(c for c in phone if c.isdigit())
+                clean_digits = "".join(c for c in phone if c.isdigit())
+                phone_dial = clean_digits if clean_digits.startswith("1") else f"1{clean_digits}"
+                
+                # Format phone nicely for reading
+                formatted_phone = phone
+                if len(clean_digits) == 10:
+                    formatted_phone = f"({clean_digits[:3]}) {clean_digits[3:6]}-{clean_digits[6:]}"
+
+                # Format services as clean bullets
+                if isinstance(services, list) and services:
+                    services_list_text = "\n".join(f"• {s}" for s in services)
+                else:
+                    services_list_text = f"• {services_str or 'Servicio General'}"
+
                 embed = discord.Embed(
                     title="🚨 ¡NUEVA COTIZACIÓN RECIBIDA EN LA WEB!",
-                    description=(
-                        f"Un cliente acaba de llenar el formulario en tu página web:\n\n"
-                        f"👤 **Nombre:** `{name}`\n"
-                        f"📱 **Teléfono:** **`{phone}`**\n"
-                        f"🌿 **Servicios Solicitados:**\n*{services_str}*\n\n"
-                        f"📍 **Dirección:** `{address}`\n"
-                        f"📅 **Fecha sugerida:** `{date_val} ({time_val})`\n"
-                        f"🌐 **Origen:** `{source}`\n"
-                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-                    ),
+                    description=f"Un cliente acaba de llenar el formulario en tu página web (**{source}**):\n",
                     color=discord.Color.from_rgb(22, 163, 74),
                     timestamp=discord.utils.utcnow()
                 )
-                embed.set_footer(text="Rodriguez LawnCare • Lead Notification System")
+                embed.add_field(name="👤 Cliente", value=f"**{name}**", inline=True)
+                embed.add_field(name="📱 Teléfono", value=f"**{formatted_phone}**", inline=True)
+                embed.add_field(name="🌐 Formulario", value=f"`{source}`", inline=True)
+                embed.add_field(name="🌿 Servicios Solicitados", value=services_list_text, inline=False)
+                
+                if address and address != "Por coordinar por llamada/mensaje" and address != "To be confirmed by call/text":
+                    embed.add_field(name="📍 Dirección", value=f"`{address}`", inline=True)
+                if date_val and date_val != "Lo antes posible" and date_val != "As soon as possible":
+                    embed.add_field(name="📅 Fecha / Horario", value=f"`{date_val} ({time_val})`", inline=True)
+                if frequency and frequency not in ["To be decided", "No especificada"]:
+                    embed.add_field(name="🔄 Frecuencia", value=f"`{frequency}`", inline=True)
+                if description and description not in ["Quick request from website", "No additional notes", ""]:
+                    embed.add_field(name="📝 Notas / Mensaje", value=f"*{description}*", inline=False)
+
+                embed.set_footer(text=f"Rodriguez LawnCare • Sistema de Notificaciones Web • #{channel.name}")
 
                 view = discord.ui.View()
-                if clean_phone:
-                    phone_dial = clean_phone if clean_phone.startswith("1") else f"1{clean_phone}"
-                    view.add_item(discord.ui.Button(label="Llamar Cliente", style=discord.ButtonStyle.link, url=f"tel:+{phone_dial}", emoji="📞"))
-                    view.add_item(discord.ui.Button(label="Enviar WhatsApp", style=discord.ButtonStyle.link, url=f"https://wa.me/{phone_dial}", emoji="💬"))
+                if clean_digits:
+                    wa_url = f"https://wa.me/{phone_dial}?text=Hola%20{name.replace(' ', '%20')},%20te%20escribimos%20de%20Rodriguez%20LawnCare%20sobre%20tu%20solicitud%20de%20cotizacion."
+                    view.add_item(discord.ui.Button(label="Abrir WhatsApp del Cliente", style=discord.ButtonStyle.link, url=wa_url, emoji="💬"))
 
-                await channel.send(content="@everyone 🔔 **¡Nuevo Cliente interesado en tu página web!**", embed=embed, view=view)
+                await channel.send(
+                    content=f"🔔 **¡Nuevo Cliente interesado en tu página web!** (`{name}` • `{formatted_phone}`)",
+                    embed=embed,
+                    view=view if clean_digits else None
+                )
+                print(f"✅ Lead enviado exitosamente a canal Discord {target_chan_id} (#{channel.name})")
+            else:
+                print(f"⚠️ No se pudo enviar el lead: canal {target_chan_id} no disponible")
 
-        return web.json_response({"success": True})
+        return web.json_response({"success": True, "message": "Lead received and forwarded to Discord"})
     except Exception as e:
-        print(f"Error procesando lead web: {e}")
+        print(f"❌ Error procesando lead web: {e}")
         return web.json_response({"success": False, "error": str(e)}, status=400)
 
 def create_web_app():
