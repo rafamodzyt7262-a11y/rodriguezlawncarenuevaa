@@ -1700,39 +1700,6 @@ button, input, select, textarea {
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-md);
   background-color: var(--white);
-}
-
-.hero-service-checkboxes {
-  max-height: 205px;
-  overflow-y: auto;
-  gap: 0.4rem;
-  padding: 0.5rem;
-  background-color: #fafbfc;
-}
-
-.hero-service-checkboxes::-webkit-scrollbar,
-.service-checkbox-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.hero-service-checkboxes::-webkit-scrollbar-thumb,
-.service-checkbox-list::-webkit-scrollbar-thumb {
-  background: var(--gray-300);
-  border-radius: 4px;
-}
-
-.booking-services-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-  padding: 0.85rem;
-  background-color: #fafbfc;
-  border: 1.5px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  max-height: none;
-  overflow: visible;
-}
-
 .service-checkbox-item {
   display: flex;
   align-items: center;
@@ -1749,15 +1716,45 @@ button, input, select, textarea {
   user-select: none;
 }
 
-.hero-service-checkboxes .service-checkbox-item {
-  padding: 0.5rem 0.7rem;
-  font-size: 0.88rem;
+.booking-services-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  background-color: #fafbfc;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  max-height: none;
+  overflow: visible;
 }
 
-.service-checkbox-icon {
-  font-size: 1.15rem;
+.hero-service-checkboxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  padding: 0.6rem;
+  background-color: #fafbfc;
+  max-height: none;
+  overflow: visible;
+}
+
+.hero-service-checkboxes .service-checkbox-item {
+  padding: 0.45rem 0.55rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hero-service-checkboxes .service-checkbox-icon {
+  font-size: 1rem;
   flex-shrink: 0;
-  line-height: 1;
+}
+
+.hero-service-checkboxes .service-checkbox-text {
+  font-size: 0.78rem;
+  line-height: 1.25;
 }
 
 .service-checkbox-text {

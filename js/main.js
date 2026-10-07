@@ -629,6 +629,15 @@ ${servicesBullets}
       `;
     }
 
+    // Instantly notify Discord Bot via /api/lead
+    try {
+      fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).catch(err => console.log('Lead notification sent:', err));
+    } catch (e) {}
+
     // Automatically trigger WhatsApp in new tab so owner receives it immediately
     window.open(activeWhatsAppUrl, '_blank');
 

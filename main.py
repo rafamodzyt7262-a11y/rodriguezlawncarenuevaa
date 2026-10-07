@@ -550,6 +550,8 @@ def build_bot(enable_message_content: bool):
 
 
 # ----------------- WEB SERVER (AIOHTTP) -----------------
+bot_global = None
+
 async def handle_index(request):
     """Serves the main website homepage."""
     index_path = os.path.join(BASE_DIR, "index.html")
@@ -563,11 +565,60 @@ async def handle_gallery_json(request):
         "Access-Control-Allow-Origin": "*"
     })
 
+async def handle_lead_submission(request):
+    """Handles lead form submissions and sends instant notification to Discord."""
+    global bot_global
+    try:
+        data = await request.json()
+        name = data.get("name", "Cliente")
+        phone = data.get("phone", "No proporcionado")
+        services = data.get("services", [])
+        services_str = ", ".join(services) if isinstance(services, list) else str(services)
+        address = data.get("address", "Por coordinar por llamada/mensaje")
+        date_val = data.get("date", "Lo antes posible")
+        time_val = data.get("time", "Horario habitual")
+        source = data.get("source", "Estimado 1-Minuto (Web)")
+
+        if bot_global and bot_global.is_ready():
+            channel = bot_global.get_channel(CHANNEL_ID)
+            if channel:
+                clean_phone = "".join(c for c in phone if c.isdigit())
+                embed = discord.Embed(
+                    title="🚨 ¡NUEVA COTIZACIÓN RECIBIDA EN LA WEB!",
+                    description=(
+                        f"Un cliente acaba de llenar el formulario en tu página web:\n\n"
+                        f"👤 **Nombre:** `{name}`\n"
+                        f"📱 **Teléfono:** **`{phone}`**\n"
+                        f"🌿 **Servicios Solicitados:**\n*{services_str}*\n\n"
+                        f"📍 **Dirección:** `{address}`\n"
+                        f"📅 **Fecha sugerida:** `{date_val} ({time_val})`\n"
+                        f"🌐 **Origen:** `{source}`\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                    ),
+                    color=discord.Color.from_rgb(22, 163, 74),
+                    timestamp=discord.utils.utcnow()
+                )
+                embed.set_footer(text="Rodriguez LawnCare • Lead Notification System")
+
+                view = discord.ui.View()
+                if clean_phone:
+                    phone_dial = clean_phone if clean_phone.startswith("1") else f"1{clean_phone}"
+                    view.add_item(discord.ui.Button(label="Llamar Cliente", style=discord.ButtonStyle.link, url=f"tel:+{phone_dial}", emoji="📞"))
+                    view.add_item(discord.ui.Button(label="Enviar WhatsApp", style=discord.ButtonStyle.link, url=f"https://wa.me/{phone_dial}", emoji="💬"))
+
+                await channel.send(content="@everyone 🔔 **¡Nuevo Cliente interesado en tu página web!**", embed=embed, view=view)
+
+        return web.json_response({"success": True})
+    except Exception as e:
+        print(f"Error procesando lead web: {e}")
+        return web.json_response({"success": False, "error": str(e)}, status=400)
+
 def create_web_app():
     app = web.Application()
     app.router.add_get('/', handle_index)
     app.router.add_get('/index.html', handle_index)
     app.router.add_get('/gallery.json', handle_gallery_json)
+    app.router.add_post('/api/lead', handle_lead_submission)
     # Static files (CSS, JS, Assets)
     app.router.add_static('/', path=BASE_DIR, show_index=False)
     return app
@@ -575,6 +626,7 @@ def create_web_app():
 
 # ----------------- MAIN RUNNER (CONCURRENT WEB + BOT) -----------------
 async def main():
+    global bot_global
     # 1. Start Web Server
     web_app = create_web_app()
     runner = web.AppRunner(web_app)
@@ -584,18 +636,16 @@ async def main():
     print(f"🌐 Servidor Web Rodriguez LawnCare escuchando en http://0.0.0.0:{PORT}")
 
     # 2. Start Discord Bot
-    bot = None
     try:
         print("🤖 Iniciando Discord Bot con Message Content Intent...")
-        bot = build_bot(enable_message_content=True)
-        await bot.start(BOT_TOKEN)
+        bot_global = build_bot(enable_message_content=True)
+        await bot_global.start(BOT_TOKEN)
     except discord.errors.PrivilegedIntentsRequired:
         print("ℹ️ Iniciando Bot en modo Slash Commands (/subir, /fotos, /eliminar) y Botones...")
-        bot = build_bot(enable_message_content=False)
-        await bot.start(BOT_TOKEN)
+        bot_global = build_bot(enable_message_content=False)
+        await bot_global.start(BOT_TOKEN)
     except Exception as e:
         print(f"Error en Discord Bot: {e}")
-        # Keep web server running even if Discord fails
         while True:
             await asyncio.sleep(3600)
 
