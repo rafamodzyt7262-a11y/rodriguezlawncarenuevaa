@@ -473,13 +473,13 @@ button, input, select, textarea {
 }
 
 .hero-bg-media img {
+  z-index: 1;
   transform: scale(1.03);
-  animation: subtleZoom 20s infinite alternate ease-in-out;
 }
 
-@keyframes subtleZoom {
-  0% { transform: scale(1.0); }
-  100% { transform: scale(1.06); }
+.hero-bg-media video {
+  z-index: 2;
+  opacity: 1;
 }
 
 .hero-overlay {
@@ -490,16 +490,16 @@ button, input, select, textarea {
   height: 100%;
   background: linear-gradient(
     90deg,
-    rgba(10, 24, 18, 0.92) 0%,
-    rgba(10, 24, 18, 0.82) 55%,
-    rgba(10, 24, 18, 0.5) 100%
+    rgba(10, 24, 18, 0.88) 0%,
+    rgba(10, 24, 18, 0.72) 45%,
+    rgba(10, 24, 18, 0.35) 100%
   );
-  z-index: 2;
+  z-index: 3;
 }
 
 .hero-content-wrap {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 3.5rem;

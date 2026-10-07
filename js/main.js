@@ -223,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBookingForms();
   initNavbarScroll();
   initMobileMenu();
+  initHeroVideo();
 });
 
 // --- 1. LANGUAGE INITIALIZATION (100% ENGLISH) ---
@@ -764,4 +765,34 @@ function initMobileMenu() {
       navLinks.classList.remove('mobile-active');
     });
   });
+}
+
+// --- 9. HERO VIDEO AUTOPLAY HANDLER ---
+function initHeroVideo() {
+  const video = document.getElementById('heroBgVideo');
+  if (!video) return;
+
+  // Guarantee muted playback across desktop, iOS Safari, Android Chrome
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+  video.setAttribute('muted', '');
+
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      // If browser blocked initial autoplay, retry on first user tap/scroll anywhere
+      const resumeOnInteraction = () => {
+        video.play().catch(() => {});
+        window.removeEventListener('click', resumeOnInteraction);
+        window.removeEventListener('touchstart', resumeOnInteraction);
+        window.removeEventListener('scroll', resumeOnInteraction);
+      };
+      window.addEventListener('click', resumeOnInteraction, { once: true, passive: true });
+      window.addEventListener('touchstart', resumeOnInteraction, { once: true, passive: true });
+      window.addEventListener('scroll', resumeOnInteraction, { once: true, passive: true });
+    });
+  }
 }
