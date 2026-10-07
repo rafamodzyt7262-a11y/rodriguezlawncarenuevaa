@@ -224,18 +224,19 @@
             </div>
             <img src="${item.url}" alt="${escapeHtml(title)}" class="gallery-img" loading="lazy" onerror="this.src='./assets/images/mowing.jpg'">
             <div class="gallery-overlay">
-              <span class="gallery-zoom-icon">🔍</span>
-              <span class="gallery-overlay-badge">${icon} ${escapeHtml(category)}</span>
-              <span class="gallery-overlay-text">${escapeHtml(title)}</span>
+              <span class="gallery-zoom-pill">🔍 Ampliar Foto</span>
             </div>
           </div>
           <div class="gallery-info">
             <div class="gallery-cat-row">
               <span class="gallery-cat-tag">${icon} ${escapeHtml(category)}</span>
-              <span class="gallery-id-tag">Foto #${idFormatted}</span>
+              <span class="gallery-id-tag">#${idFormatted}</span>
             </div>
             <h3 class="gallery-title">${escapeHtml(title)}</h3>
-            <span class="gallery-sub-tag">📸 Verified LawnCare Job • Central Texas</span>
+            <div class="gallery-card-footer">
+              <span class="gallery-sub-tag">📍 Killeen & Central TX</span>
+              <span class="gallery-verified-badge">✓ Verificado</span>
+            </div>
           </div>
         </div>
       `;
