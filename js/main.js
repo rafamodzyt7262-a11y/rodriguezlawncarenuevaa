@@ -35,6 +35,7 @@ const translations = {
     hero_card_sub: 'Get your free, no-obligation quote today',
     form_name: 'Full Name',
     form_phone: 'Phone Number',
+    form_extra_details: 'Extra Details (Optional)',
     form_service_select: 'Services Needed (Check all that apply)',
     form_opt_mowing: 'Recurring Mowing & Edging',
     form_opt_mulch: 'Mulch & Flower Bed Refresh',
@@ -613,6 +614,11 @@ function initBookingForms() {
           <span class="modal-summary-label">🌿 Services:</span>
           <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 65%; justify-content: flex-end;">${pillsHtml}</div>
         </div>
+        ${data.description && data.description !== 'Quick request from website (Quick 1-Minute Estimate)' && data.description !== 'No additional notes' ? `
+        <div class="modal-summary-row" style="flex-direction: column; gap: 0.25rem;">
+          <span class="modal-summary-label">📝 Extra Details:</span>
+          <span class="modal-summary-val" style="text-align: left; font-style: italic; background: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #e2e8f0;">"${data.description}"</span>
+        </div>` : ''}
         <div style="margin-top: 0.85rem; padding: 0.75rem 1rem; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; font-size: 0.88rem; color: #166534; display: flex; align-items: center; gap: 8px; text-align: left;">
           <span style="font-size: 1.25rem;">🟢</span>
           <span><strong>Request Sent!</strong> We have received your request in our dispatch logs and will call or text you shortly.</span>
@@ -678,6 +684,7 @@ function initBookingForms() {
     heroForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const services = getSelectedServices('heroServiceCheckboxes', 'Front & Back Yard Cut');
+      const extraNotes = document.getElementById('heroNotes')?.value?.trim() || '';
       const data = {
         name: document.getElementById('heroName')?.value || 'Customer',
         phone: document.getElementById('heroPhone')?.value || '',
@@ -687,7 +694,7 @@ function initBookingForms() {
         services: services,
         service: services.join(', '),
         frequency: 'To be decided',
-        description: 'Quick request from website (Quick 1-Minute Estimate)',
+        description: extraNotes,
         source: 'Quick 1-Minute Estimate (Hero Card)'
       };
 
