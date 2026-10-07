@@ -1,0 +1,116 @@
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <!-- CABECERA -->
+  <tr>
+    <td style="background-color: #15803d; padding: 26px 20px; text-align: center;">
+      <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.2); padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;">
+        🌿 REPORTE DE IA 24/7
+      </div>
+      <h1 style="margin: 8px 0 4px 0; font-size: 22px; font-weight: 900; color: #ffffff; text-transform: uppercase;">
+        RODRIGUEZ LAWNCARE
+      </h1>
+      <p style="margin: 0; font-size: 13px; font-weight: 700; color: #fef08a;">
+        🚨 ¡NUEVO CLIENTE REGISTRADO!
+      </p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding: 20px;">
+      <!-- BOTONES DE CONTACTO DIRECTO -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 18px;">
+        <tr>
+          <td width="48%" style="text-align: center;">
+            <a href="tel:{{ifempty(1.message.call.customer.number; 1.message.customer.number)}}" style="display: block; background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 13px;">
+              📞 Llamar al Cliente
+            </a>
+          </td>
+          <td width="4%"></td>
+          <td width="48%" style="text-align: center;">
+            <a href="https://wa.me/{{ifempty(1.message.call.customer.number; 1.message.customer.number)}}" target="_blank" style="display: block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 13px;">
+              💬 Enviar WhatsApp
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- 1. CONTACTO DEL CLIENTE (NOMBRE ARRIBA Y TELÉFONO ABAJO) -->
+      <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; margin-bottom: 8px;">
+          👤 CONTACTO DEL CLIENTE
+        </div>
+        <table border="0" cellpadding="3" cellspacing="0" width="100%">
+          <tr>
+            <td width="28%" style="font-size: 13px; color: #64748b; font-weight: 600;">👤 Nombre:</td>
+            <td style="font-size: 15px; color: #0f172a; font-weight: 800;">
+              {{ifempty(get(1.message.artifact.structuredOutputs; "79deda93-cbc9-4499-8ac8-fa0cf2054fa1.result"); ifempty(get(1.message.call.artifact.structuredOutputs; "79deda93-cbc9-4499-8ac8-fa0cf2054fa1.result"); ifempty(get(1.artifact.structuredOutputs; "79deda93-cbc9-4499-8ac8-fa0cf2054fa1.result"); "Ver en conversación")))}}
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size: 13px; color: #64748b; font-weight: 600;">📞 Teléfono:</td>
+            <td style="font-size: 16px; color: #2563eb; font-weight: 800;">
+              <a href="tel:{{ifempty(1.message.call.customer.number; 1.message.customer.number)}}" style="color: #2563eb; text-decoration: none;">
+                {{ifempty(1.message.call.customer.number; 1.message.customer.number)}}
+              </a>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- 2. DIRECCIÓN Y SERVICIOS -->
+      <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 800; color: #059669; text-transform: uppercase; margin-bottom: 8px;">
+          📍 DETALLES Y DIRECCIÓN DE LA PROPIEDAD
+        </div>
+        <table border="0" cellpadding="3" cellspacing="0" width="100%">
+          <tr>
+            <td width="28%" style="font-size: 13px; color: #64748b; font-weight: 600; vertical-align: top;">🏡 Dirección:</td>
+            <td style="font-size: 14px; color: #0f172a; font-weight: 700;">
+              {{ifempty(get(1.message.artifact.structuredOutputs; "ddb395ba-50ee-449b-9499-ad18e5e58eda.result"); ifempty(get(1.message.call.artifact.structuredOutputs; "ddb395ba-50ee-449b-9499-ad18e5e58eda.result"); ifempty(get(1.artifact.structuredOutputs; "ddb395ba-50ee-449b-9499-ad18e5e58eda.result"); "Pendiente en conversación")))}}
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size: 13px; color: #64748b; font-weight: 600; vertical-align: top;">🌱 Servicios:</td>
+            <td style="font-size: 14px; color: #15803d; font-weight: 700;">
+              {{ifempty(get(1.message.artifact.structuredOutputs; "3aa6c7e6-5f75-4651-8966-5bf700c3b3c1.result"); ifempty(get(1.message.call.artifact.structuredOutputs; "3aa6c7e6-5f75-4651-8966-5bf700c3b3c1.result"); ifempty(get(1.artifact.structuredOutputs; "3aa6c7e6-5f75-4651-8966-5bf700c3b3c1.result"); "Corte de pasto / Mantenimiento")))}}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- 3. NUEVO CUADRO: DÍA, FECHA Y HORA -->
+      <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 800; color: #d97706; text-transform: uppercase; margin-bottom: 8px;">
+          📅 CITA / DÍA, FECHA Y HORA
+        </div>
+        <table border="0" cellpadding="3" cellspacing="0" width="100%">
+          <tr>
+            <td width="28%" style="font-size: 13px; color: #64748b; font-weight: 600;">🗓️ Día / Fecha:</td>
+            <td style="font-size: 14px; color: #0f172a; font-weight: 800;">
+              {{ifempty(get(1.message.artifact.structuredOutputs; "088ef5cd-5a43-49dc-bcd2-f6bb8be20d9f.result"); ifempty(get(1.message.call.artifact.structuredOutputs; "088ef5cd-5a43-49dc-bcd2-f6bb8be20d9f.result"); ifempty(get(1.artifact.structuredOutputs; "088ef5cd-5a43-49dc-bcd2-f6bb8be20d9f.result"); "Por coordinar con el cliente")))}}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- 4. RESUMEN AUTOMÁTICO DE LA IA -->
+      <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 800; color: #166534; text-transform: uppercase; margin-bottom: 4px;">
+          📋 RESUMEN DE LA ORDEN
+        </div>
+        <div style="font-size: 13px; color: #14532d; line-height: 1.4;">
+          {{ifempty(1.message.summary; ifempty(1.summary; ifempty(1.message.analysis.summary; "Llamada completada y procesada por la IA.")))}}
+        </div>
+      </div>
+
+      <!-- 5. TRANSCRIPCIÓN COMPLETA -->
+      <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px;">
+        <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+          💬 CONVERSACIÓN COMPLETA (TRANSCRIPCIÓN)
+        </div>
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #334155; line-height: 1.5; white-space: pre-wrap;">
+{{ifempty(1.message.transcript; 1.transcript)}}
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>

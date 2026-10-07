@@ -1,0 +1,52 @@
+/**
+ * =========================================================================
+ * RODRIGUEZ LAWNCARE - MILITARY-GRADE SILENT STYLESHEET SHIELD
+ * =========================================================================
+ * 1. Global Text Anti-Scrape (user-select: none)
+ * 2. Visual Media Theft Protection (user-drag: none)
+ * 3. Print-Screen & PDF Theft Neutralizer (@media print)
+ * 4. Transparent Touch Action (Zero tap latency on mobile)
+ * 5. 100% Invisible to Human Visitors
+ * =========================================================================
+ */
+
+/* Prevent mass text copying, scraping, and inspection highlighting */
+*,
+*::before,
+*::after {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow genuine customer typing in form controls */
+input,
+textarea,
+select {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Prevent image dragging to desktop, downloaders, or external scrapers */
+img,
+picture,
+svg,
+video,
+canvas {
+  -webkit-user-drag: none !important;
+  -khtml-user-drag: none !important;
+  -moz-user-drag: none !important;
+  -o-user-drag: none !important;
+  user-drag: none !important;
+  pointer-events: auto;
+}
+
+/* Print Neutralizer: If an attacker tries Ctrl+P to dump the site to a PDF, blank out sensitive structures */
+@media print {
+  body {
+    display: none !important;
+  }
+}

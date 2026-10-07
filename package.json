@@ -1,0 +1,9 @@
+{
+  "name": "rodriguez-lawncare",
+  "version": "1.0.0",
+  "description": "Rodriguez LawnCare Official Website & AI Receptionist",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

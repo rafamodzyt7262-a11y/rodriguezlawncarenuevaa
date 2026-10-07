@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rodriguez LawnCare | Diseñador & Exportador de Tarjetas de Presentación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #111827;
+      --surface-light: #1f2937;
+      --border: #374151;
+      --primary: #15803d;
+      --accent: #22c55e;
+      --gold: #f59e0b;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto 1.5rem auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-title span {
+      color: var(--accent);
+    }
+
+    .badge-officedepot {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .main-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 960px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .card-tabs {
+      display: flex;
+      background: var(--surface-light);
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+
+    .card-tab {
+      padding: 0.5rem 1.25rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .card-tab.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(21, 128, 61, 0.4);
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 650px;
+      aspect-ratio: 3.625 / 2.125;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 2px rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #cardCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .guide-info {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .guide-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .download-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 650px;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 180px;
+      padding: 0.85rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+    }
+
+    .btn-accent:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--surface-light);
+      color: #fff;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #2d3748;
+      border-color: #4b5563;
+    }
+
+    .form-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .panel-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+
+    .theme-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .theme-btn {
+      padding: 0.5rem;
+      background: var(--surface-light);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .theme-btn.active {
+      border-color: var(--accent);
+      background: rgba(34, 197, 94, 0.15);
+    }
+
+    .instructions-card {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .instructions-card h4 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .instructions-card ol {
+      padding-left: 1.25rem;
+      margin-top: 0.25rem;
+    }
+
+    .instructions-card li {
+      margin-bottom: 0.35rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1 class="brand-title">RODRIGUEZ <span>LAWNCARE</span></h1>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Generador de Tarjetas de Presentación de Alta Resolución (300 DPI)</p>
+    </div>
+    <div class="badge-officedepot">
+      <span>📐</span> Listo para Office Depot Same Day (2.125" x 3.625" Horizontal)
+    </div>
+  </header>
+
+  <main class="main-grid">
+    <!-- COLUMNA IZQUIERDA: PREVIEW Y DESCARGA -->
+    <div class="preview-card">
+      <div class="card-tabs">
+        <button class="card-tab active" id="tabFront" onclick="switchSide('front')">Frente (Cara 1)</button>
+        <button class="card-tab" id="tabBack" onclick="switchSide('back')">Reverso (Cara 2)</button>
+      </div>
+
+      <div class="canvas-container">
+        <!-- Canvas tamaño exacto 300 DPI para 3.625 x 2.125 pulgadas: 1088 x 638 px -->
+        <canvas id="cardCanvas" width="1088" height="638"></canvas>
+      </div>
+
+      <div class="guide-info">
+        <span><span class="guide-dot" style="background: #22c55e;"></span> Sangrado (Bleed): 3.625" x 2.125" (1088x638px)</span>
+        <span><span class="guide-dot" style="background: #3b82f6;"></span> Corte Final (Trim): 3.5" x 2.0"</span>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.35rem; margin-left: auto;">
+          <input type="checkbox" id="showGuides" onchange="renderCard()"> Mostrar líneas de guía
+        </label>
+      </div>
+
+      <div class="download-buttons">
+        <button class="btn btn-accent" onclick="downloadCurrentSide()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar Esta Cara (PNG 300 DPI)
+        </button>
+        <button class="btn btn-secondary" onclick="downloadBothSides()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Descargar Frente y Reverso (ZIP / Ambas)
+        </button>
+      </div>
+
+      <div class="instructions-card">
+        <h4>📌 Cómo subir tus tarjetas en Office Depot:</h4>
+        <ol>
+          <li>Haz clic arriba en <strong>"Descargar Frente"</strong> y luego en <strong>"Descargar Reverso"</strong> (se guardan en calidad ultra nítida de 300 DPI).</li>
+          <li>En la pestaña de Office Depot que tienes abierta, elige <strong>"Upload Your Own Design"</strong>.</li>
+          <li>Selecciona <strong>Front</strong> y sube el archivo de frente; luego selecciona <strong>Back</strong> y sube el del reverso.</li>
+          <li>¡Listo! El tamaño encajará exactamente al 100% sin recortar información importante.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: PERSONALIZACIÓN EN TIEMPO REAL -->
+    <div class="form-panel">
+      <div class="panel-title">
+        <span>✏️ Editar Información</span>
+        <button class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="resetDefaults()">Restaurar</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estilo / Color</label>
+        <div class="theme-picker">
+          <button class="theme-btn active" id="themeDark" onclick="setTheme('dark')">Dark Luxury</button>
+          <button class="theme-btn" id="themeForest" onclick="setTheme('forest')">Emerald Deep</button>
+          <button class="theme-btn" id="themeLight" onclick="setTheme('light')">Clean White</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nombre del Negocio</label>
+        <input type="text" id="businessName" class="form-control" value="RODRIGUEZ LAWNCARE" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Subtítulo / Especialidad</label>
+        <input type="text" id="tagline" class="form-control" value="LANDSCAPING & GROUNDS MAINTENANCE" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nombre del Propietario (Opcional)</label>
+        <input type="text" id="ownerName" class="form-control" value="Rafael Rodriguez • Owner / Operator" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Teléfono Directo / WhatsApp</label>
+        <input type="text" id="phoneDirect" class="form-control" value="(254) 612-1399" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Línea de Llamadas 24/7 AI</label>
+        <input type="text" id="phoneAI" class="form-control" value="(254) 852-8163" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Correo Electrónico</label>
+        <input type="text" id="email" class="form-control" value="arizmendir754@gmail.com" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Áreas de Servicio</label>
+        <input type="text" id="serviceAreas" class="form-control" value="Killeen • Harker Heights • Copperas Cove • Belton" oninput="renderCard()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Destino del Código QR</label>
+        <select id="qrTarget" class="form-control" onchange="updateQR()">
+          <option value="https://wa.me/12546121399">WhatsApp Directo a (254) 612-1399</option>
+          <option value="tel:2546121399">Llamada Telefónica Directa</option>
+          <option value="tel:2548528163">Línea AI 24/7 (254) 852-8163</option>
+          <option value="https://rodriguezlawncare.com">Sitio Web Oficial</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Servicios Destacados (Reverso)</label>
+        <textarea id="servicesList" class="form-control" rows="6" oninput="renderCard()">• Commercial Lawn Mowing & Striping
+• Razor-Sharp Perimeter Edging
+• Shrub, Bush & Hedge Trimming
+• Tree Trimming, Cutting & Planting
+• Mulch Installation & Flower Beds
+• Leaf Cleanups & Debris Clearing
+• Junk Removal & Property Hauling</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Garantías & Métodos de Pago</label>
+        <input type="text" id="backFooter" class="form-control" value="Fully Insured • Free Estimates • Zelle, Venmo, Cash App, Cash" oninput="renderCard()">
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentSide = 'front';
+    let currentTheme = 'dark';
+    let qrImage = new Image();
+    let qrLoaded = false;
+
+    // Load QR Code dynamically via high-res API
+    function updateQR() {
+      const targetUrl = document.getElementById('qrTarget').value;
+      qrLoaded = false;
+      qrImage = new Image();
+      qrImage.crossOrigin = 'anonymous';
+      qrImage.onload = () => {
+        qrLoaded = true;
+        renderCard();
+      };
+      // High-res QR code
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=1&format=png&data=${encodeURIComponent(targetUrl)}`;
+    }
+
+    function switchSide(side) {
+      currentSide = side;
+      document.getElementById('tabFront').classList.toggle('active', side === 'front');
+      document.getElementById('tabBack').classList.toggle('active', side === 'back');
+      renderCard();
+    }
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      document.getElementById('themeDark').classList.toggle('active', theme === 'dark');
+      document.getElementById('themeForest').classList.toggle('active', theme === 'forest');
+      document.getElementById('themeLight').classList.toggle('active', theme === 'light');
+      renderCard();
+    }
+
+    function resetDefaults() {
+      document.getElementById('businessName').value = 'RODRIGUEZ LAWNCARE';
+      document.getElementById('tagline').value = 'LANDSCAPING & GROUNDS MAINTENANCE';
+      document.getElementById('ownerName').value = 'Rafael Rodriguez • Owner / Operator';
+      document.getElementById('phoneDirect').value = '(254) 612-1399';
+      document.getElementById('phoneAI').value = '(254) 852-8163';
+      document.getElementById('email').value = 'arizmendir754@gmail.com';
+      document.getElementById('serviceAreas').value = 'Killeen • Harker Heights • Copperas Cove • Belton';
+      document.getElementById('backFooter').value = 'Fully Insured • Free Estimates • Zelle, Venmo, Cash App, Cash';
+      setTheme('dark');
+      updateQR();
+    }
+
+    // DRAW THE CARD ON CANVAS
+    function renderCard(hideGuidesForExport = false) {
+      const canvas = document.getElementById('cardCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;  // 1088 px
+      const H = canvas.height; // 638 px
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Palettes
+      let bgColor = '#0a1017';
+      let bgGradientTo = '#05080c';
+      let primaryColor = '#15803d';
+      let accentColor = '#22c55e';
+      let goldColor = '#f59e0b';
+      let textColor = '#ffffff';
+      let textMuted = '#9ca3af';
+      let cardBorderColor = 'rgba(34, 197, 94, 0.3)';
+
+      if (currentTheme === 'forest') {
+        bgColor = '#092518';
+        bgGradientTo = '#04130b';
+        accentColor = '#4ade80';
+        goldColor = '#fbbf24';
+      } else if (currentTheme === 'light') {
+        bgColor = '#f8fafc';
+        bgGradientTo = '#f1f5f9';
+        textColor = '#0f172a';
+        textMuted = '#475569';
+        cardBorderColor = '#cbd5e1';
+      }
+
+      // Background Gradient
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, bgColor);
+      grad.addColorStop(1, bgGradientTo);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Subtle Decorative angled stripe in corner
+      if (currentTheme !== 'light') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(21, 128, 61, 0.18)';
+        ctx.beginPath();
+        ctx.moveTo(W - 320, 0);
+        ctx.lineTo(W, 0);
+        ctx.lineTo(W, H);
+        ctx.lineTo(W - 140, H);
+        ctx.closePath();
+        ctx.fill();
+
+        // Thin accent line
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(W - 320, 0);
+        ctx.lineTo(W - 140, H);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.fillStyle = 'rgba(21, 128, 61, 0.08)';
+        ctx.beginPath();
+        ctx.moveTo(W - 280, 0);
+        ctx.lineTo(W, 0);
+        ctx.lineTo(W, H);
+        ctx.lineTo(W - 120, H);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Get values
+      const bName = document.getElementById('businessName').value.trim() || 'RODRIGUEZ LAWNCARE';
+      const bTag = document.getElementById('tagline').value.trim() || 'LANDSCAPING & GROUNDS MAINTENANCE';
+      const oName = document.getElementById('ownerName').value.trim();
+      const pDirect = document.getElementById('phoneDirect').value.trim();
+      const pAI = document.getElementById('phoneAI').value.trim();
+      const em = document.getElementById('email').value.trim();
+      const sAreas = document.getElementById('serviceAreas').value.trim();
+
+      // TRIM & SAFE ZONES
+      // Document is 3.625 x 2.125 in (1088 x 638 px)
+      // Cut line is 0.0625" inside = ~19 px on each side -> (19, 19, 1050, 600)
+      // Safe zone is 0.1875" inside = ~56 px on each side -> (56, 56, 976, 526)
+      const safeLeft = 70;
+      const safeTop = 60;
+      const safeRight = W - 70;
+      const safeBottom = H - 60;
+
+      // ----------------------------------------------------
+      // DRAW FRONT SIDE
+      // ----------------------------------------------------
+      if (currentSide === 'front') {
+        // Top Left: Logo / Brand Badge
+        drawLogoBadge(ctx, safeLeft, safeTop + 24, accentColor, goldColor);
+
+        // Brand Name
+        ctx.font = '800 38px "Outfit", sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.fillText("RODRIGUEZ", safeLeft + 72, safeTop + 32);
+
+        // "LAWNCARE" in accent
+        const nameWidth = ctx.measureText("RODRIGUEZ ").width;
+        ctx.fillStyle = accentColor;
+        ctx.fillText("LAWNCARE", safeLeft + 72 + nameWidth - 8, safeTop + 32);
+
+        // Tagline
+        ctx.font = '600 13px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = goldColor;
+        ctx.letterSpacing = '2px';
+        ctx.fillText(bTag.toUpperCase(), safeLeft + 74, safeTop + 58);
+        ctx.letterSpacing = '0px';
+
+        // Thin separator rule
+        ctx.strokeStyle = (currentTheme === 'light') ? '#e2e8f0' : 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(safeLeft, safeTop + 90);
+        ctx.lineTo(safeRight - 220, safeTop + 90);
+        ctx.stroke();
+
+        // Owner Name / Title
+        if (oName) {
+          ctx.font = '700 20px "Outfit", sans-serif';
+          ctx.fillStyle = textColor;
+          ctx.fillText(oName, safeLeft, safeTop + 130);
+        }
+
+        // Contact Items
+        const contactStartY = safeTop + 175;
+        const lineSpacing = 38;
+
+        // Item 1: Direct Phone / WhatsApp
+        drawContactItem(ctx, safeLeft, contactStartY, '📞', 'Direct / WhatsApp:', pDirect, '#22c55e', textColor);
+
+        // Item 2: 24/7 AI Line
+        drawContactItem(ctx, safeLeft, contactStartY + lineSpacing, '🤖', '24/7 Call Line:', pAI, goldColor, textColor);
+
+        // Item 3: Email
+        drawContactItem(ctx, safeLeft, contactStartY + (lineSpacing * 2), '✉️', 'Email:', em, textMuted, textColor);
+
+        // Bottom Bar: Service Area Badge
+        const footerY = safeBottom - 18;
+        ctx.fillStyle = (currentTheme === 'light') ? '#e2e8f0' : 'rgba(34, 197, 94, 0.12)';
+        roundRect(ctx, safeLeft, footerY - 26, (safeRight - safeLeft) - 220, 36, 8, true, false);
+
+        ctx.font = '600 13px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = (currentTheme === 'light') ? '#15803d' : '#4ade80';
+        ctx.fillText("📍 Serving: " + sAreas, safeLeft + 14, footerY - 3);
+
+        // QR CODE BOX (Right Side)
+        const qrSize = 175;
+        const qrX = safeRight - qrSize;
+        const qrY = safeTop + 105;
+
+        // QR White container for max scannability
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 12;
+        roundRect(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 55, 12, true, false);
+        ctx.shadowBlur = 0;
+
+        // Draw QR Image
+        if (qrLoaded && qrImage.complete) {
+          ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+        } else {
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(qrX, qrY, qrSize, qrSize);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '600 12px sans-serif';
+          ctx.fillText('Generando QR...', qrX + 35, qrY + 90);
+        }
+
+        // QR Label
+        ctx.font = '700 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.textAlign = 'center';
+        ctx.fillText("SCAN TO CONNECT", qrX + (qrSize / 2), qrY + qrSize + 16);
+        ctx.font = '500 10.5px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#15803d';
+        ctx.fillText("Free Instant Quote", qrX + (qrSize / 2), qrY + qrSize + 32);
+        ctx.textAlign = 'left';
+
+        // Commercial Insured badge
+        const badgeY = safeTop + 30;
+        ctx.fillStyle = (currentTheme === 'light') ? 'rgba(21, 128, 61, 0.15)' : 'rgba(245, 158, 11, 0.15)';
+        ctx.strokeStyle = goldColor;
+        ctx.lineWidth = 1;
+        roundRect(ctx, safeRight - 195, badgeY - 18, 195, 28, 14, true, true);
+
+        ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = goldColor;
+        ctx.fillText("🛡️ COMMERCIALLY INSURED", safeRight - 182, badgeY);
+
+      } else {
+        // ----------------------------------------------------
+        // DRAW BACK SIDE (Servicios, Respaldo y Formas de Pago)
+        // ----------------------------------------------------
+        // Header
+        ctx.font = '800 28px "Outfit", sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.fillText("OUR PROFESSIONAL SERVICES", safeLeft, safeTop + 24);
+
+        ctx.font = '600 13px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = accentColor;
+        ctx.fillText("HIGH-PRECISION LAWN CARE • RESIDENTIAL & COMMERCIAL", safeLeft, safeTop + 50);
+
+        // Separator
+        ctx.strokeStyle = (currentTheme === 'light') ? '#e2e8f0' : 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(safeLeft, safeTop + 68);
+        ctx.lineTo(safeRight, safeTop + 68);
+        ctx.stroke();
+
+        // 2 Columns of Services
+        const rawServices = document.getElementById('servicesList').value.split('\n').filter(s => s.trim().length > 0);
+        const col1 = rawServices.slice(0, Math.ceil(rawServices.length / 2));
+        const col2 = rawServices.slice(Math.ceil(rawServices.length / 2));
+
+        const listStartY = safeTop + 115;
+        const rowHeight = 44;
+
+        // Left Column
+        col1.forEach((service, index) => {
+          drawServiceItem(ctx, safeLeft, listStartY + (index * rowHeight), service.replace(/^[•\-\*]\s*/, ''), accentColor, textColor);
+        });
+
+        // Right Column
+        const col2X = safeLeft + 480;
+        col2.forEach((service, index) => {
+          drawServiceItem(ctx, col2X, listStartY + (index * rowHeight), service.replace(/^[•\-\*]\s*/, ''), accentColor, textColor);
+        });
+
+        // Bottom Trust & Payment Card
+        const bannerY = safeBottom - 75;
+        ctx.fillStyle = (currentTheme === 'light') ? '#e2e8f0' : 'rgba(17, 24, 39, 0.9)';
+        ctx.strokeStyle = cardBorderColor;
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, safeLeft, bannerY, safeRight - safeLeft, 75, 12, true, true);
+
+        // Trust Icons & Payment Methods
+        ctx.font = '700 14px "Outfit", sans-serif';
+        ctx.fillStyle = goldColor;
+        ctx.fillText("⭐ 100% SATISFACTION GUARANTEED", safeLeft + 20, bannerY + 30);
+
+        ctx.font = '600 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = textMuted;
+        ctx.fillText("Daily Sharpened Blades • Punctual Weekly Schedules • Direct Homeowner & Contractor Jobs", safeLeft + 20, bannerY + 52);
+
+        // Right side of banner: Payment badges
+        const footerNote = document.getElementById('backFooter').value;
+        ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = accentColor;
+        ctx.textAlign = 'right';
+        ctx.fillText("💵 Accepted Payments:", safeRight - 20, bannerY + 30);
+
+        ctx.font = '600 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.fillText("Zelle • Venmo • Cash App • PayPal • Cash", safeRight - 20, bannerY + 52);
+        ctx.textAlign = 'left';
+      }
+
+      // DRAW CUT & SAFE GUIDES (If checked and not exporting)
+      const showGuides = document.getElementById('showGuides').checked && !hideGuidesForExport;
+      if (showGuides) {
+        ctx.save();
+        // Cut Line (3.5" x 2.0" -> inset by 19px)
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 6]);
+        ctx.strokeRect(19, 19, W - 38, H - 38);
+
+        // Safe Area Line (3.25" x 1.75" -> inset by 56px)
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(56, 56, W - 112, H - 112);
+
+        // Guide text labels
+        ctx.font = '700 10px monospace';
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillText("✂️ LÍNEA DE CORTE (TRIM LINE: 3.5\" x 2.0\")", 24, 34);
+
+        ctx.fillStyle = '#22c55e';
+        ctx.fillText("🛡️ ZONA SEGURA (SAFE ZONE: 3.25\" x 1.75\")", 62, 72);
+        ctx.restore();
+      }
+    }
+
+    // Helper: Draw Vector Leaf/Blade Logo Badge
+    function drawLogoBadge(ctx, x, y, accent, gold) {
+      ctx.save();
+      // Outer subtle glow circle
+      const r = 26;
+      const grad = ctx.createRadialGradient(x + r, y, 5, x + r, y, r);
+      grad.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
+      grad.addColorStop(1, 'rgba(34, 197, 94, 0.05)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x + r, y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Stylized leaf shape
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y - 18);
+      ctx.bezierCurveTo(x + r + 20, y - 10, x + r + 18, y + 14, x + r, y + 18);
+      ctx.bezierCurveTo(x + r - 18, y + 14, x + r - 20, y - 10, x + r, y - 18);
+      ctx.fill();
+
+      // Center leaf vein
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y - 14);
+      ctx.lineTo(x + r, y + 14);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Helper: Contact item with icon
+    function drawContactItem(ctx, x, y, icon, label, val, labelColor, valColor) {
+      // Icon Box
+      ctx.font = '18px sans-serif';
+      ctx.fillText(icon, x, y + 14);
+
+      // Text
+      ctx.font = '600 12px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = labelColor;
+      ctx.fillText(label, x + 30, y);
+
+      ctx.font = '700 19px "Outfit", sans-serif';
+      ctx.fillStyle = valColor;
+      ctx.fillText(val, x + 30, y + 20);
+    }
+
+    // Helper: Service item
+    function drawServiceItem(ctx, x, y, name, accent, text) {
+      // Checkmark box
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
+      roundRect(ctx, x, y - 18, 26, 26, 6, true, false);
+
+      ctx.font = '700 15px sans-serif';
+      ctx.fillStyle = accent;
+      ctx.fillText("✓", x + 7, y + 1);
+
+      ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = text;
+      ctx.fillText(name, x + 38, y + 1);
+    }
+
+    // Helper: Rounded Rectangle
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // Download single side
+    function downloadCurrentSide() {
+      // Re-render without guides for clean print upload
+      renderCard(true);
+      const canvas = document.getElementById('cardCanvas');
+      const filename = `RodriguezLawnCare_BusinessCard_${currentSide.toUpperCase()}_300DPI.png`;
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+      // Restore view
+      renderCard(false);
+    }
+
+    // Download both sides
+    function downloadBothSides() {
+      // 1. Download Front
+      switchSide('front');
+      setTimeout(() => {
+        downloadCurrentSide();
+        // 2. Download Back
+        setTimeout(() => {
+          switchSide('back');
+          setTimeout(() => {
+            downloadCurrentSide();
+          }, 400);
+        }, 600);
+      }, 300);
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateQR();
+      // Ensure fonts are loaded before initial render
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          renderCard();
+        });
+      } else {
+        setTimeout(renderCard, 500);
+      }
+    });
+  </script>
+</body>
+</html>

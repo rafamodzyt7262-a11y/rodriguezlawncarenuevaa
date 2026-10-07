@@ -1,0 +1,70 @@
+{
+  "name": "Rodriguez LawnCare AI Receptionist",
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "multi"
+  },
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "temperature": 0.4,
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are the friendly, bilingual AI phone receptionist for Rodriguez LawnCare, serving Killeen, Harker Heights, Copperas Cove, and Belton, TX. Phone: (254) 612-1399.\n\nKeep answers short (1-2 sentences). If caller speaks Spanish, speak Spanish. If English, speak English.\n\nServices: Front & Back Yard Cut, Perimeter Edging, Shrub & Hedge Trimming, Tree Cutting & Trimming, Tree Planting, Leaf Cleanup & Raking, Yard Debris Clearing, Junk Removal & Hauling.\n\nFlow: Greet warmly -> Identify service -> Ask address (verify Killeen, Harker Heights, Copperas Cove, Belton) -> Ask preferred date & time -> Confirm caller name and phone -> Save lead."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "save_lead",
+          "description": "Saves customer lead information to dispatch team via SMS and WhatsApp",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_name": { "type": "string", "description": "Customer full name" },
+              "customer_phone": { "type": "string", "description": "Customer phone number" },
+              "address": { "type": "string", "description": "Property address including city" },
+              "city": { "type": "string", "enum": ["Killeen", "Harker Heights", "Copperas Cove", "Belton", "Other"] },
+              "services_needed": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "List of lawn care services requested"
+              },
+              "preferred_date": { "type": "string", "description": "Preferred service or estimate date" },
+              "preferred_time": { "type": "string", "description": "Preferred time window (e.g. morning, afternoon)" },
+              "notes": { "type": "string", "description": "Additional job details or customer notes" }
+            },
+            "required": ["customer_name", "customer_phone", "address", "services_needed"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "transfer_call_to_owner",
+          "description": "Transfers call directly to owner when customer demands to speak to a person right now",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "voice": {
+    "provider": "cartesia",
+    "voiceId": "248be419-c632-4f23-add1-07c499266133"
+  },
+  "firstMessage": "Thank you for calling Rodriguez LawnCare! How can I help you with your yard today?",
+  "endCallPhrases": ["goodbye", "have a great day", "bye bye", "adiós", "muchas gracias"],
+  "recordingEnabled": true,
+  "forwardingPhoneNumber": "+12546121399",
+  "serverMessages": [
+    "end-of-call-report"
+  ]
+}
