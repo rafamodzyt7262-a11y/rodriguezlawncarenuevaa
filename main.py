@@ -956,6 +956,29 @@ def build_bot(enable_message_content: bool):
             color=discord.Color.orange()
         )
 
+    @bot.event
+    async def on_disconnect():
+        print("⚠️ [DISCORD 24/7] Bot desconectado temporalmente del gateway...")
+
+    @bot.event
+    async def on_resumed():
+        print("🟢 [DISCORD 24/7] Conexión y sesión reanudada con éxito.")
+
+    @bot.event
+    async def on_error(event_method, *args, **kwargs):
+        print(f"⚠️ [DISCORD ERROR] Error en evento '{event_method}': {sys.exc_info()[1]}")
+
+    async def on_tree_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+        cmd_name = interaction.command.name if interaction.command else "accion"
+        print(f"⚠️ [SLASH ERROR] Error en /{cmd_name}: {error}")
+        try:
+            if not interaction.response.is_done():
+                await interaction.response.send_message("❌ Error temporal al procesar la acción.", ephemeral=True)
+        except Exception:
+            pass
+
+    bot.tree.on_error = on_tree_error
+
     return bot
 
 
@@ -1064,41 +1087,91 @@ async def handle_lead_submission(request):
         print(f"❌ Error procesando lead web: {e}")
         return web.json_response({"success": False, "error": str(e)}, status=400)
 
+async def handle_health(request):
+    """Healthcheck endpoint for Railway, uptime pingers, and system diagnostics."""
+    is_bot_ready = bool(bot_global and bot_global.is_ready())
+    return web.json_response({
+        "status": "healthy",
+        "bot_online": is_bot_ready,
+        "bot_user": str(bot_global.user) if is_bot_ready else None,
+        "leads_channel_id": LEADS_CHANNEL_ID,
+        "server_time": time.time()
+    }, headers={"Cache-Control": "no-cache"})
+
 def create_web_app():
     app = web.Application()
     app.router.add_get('/', handle_index)
     app.router.add_get('/index.html', handle_index)
     app.router.add_get('/gallery.json', handle_gallery_json)
+    app.router.add_get('/health', handle_health)
+    app.router.add_get('/ping', handle_health)
     app.router.add_post('/api/lead', handle_lead_submission)
     # Static files (CSS, JS, Assets)
     app.router.add_static('/', path=BASE_DIR, show_index=False)
     return app
 
 
+async def keepalive_heartbeat():
+    """Background task that logs periodic heartbeat and verifies bot connectivity every 5 minutes."""
+    while True:
+        await asyncio.sleep(300)
+        try:
+            if bot_global and bot_global.is_ready():
+                print(f"💚 [HEARTBEAT 24/7] Servidor y Bot activos al 100%. Conectado como {bot_global.user}. Canal Leads: {LEADS_CHANNEL_ID}")
+            else:
+                print("🟡 [HEARTBEAT 24/7] Servidor web activo, verificando reconexión del Discord Bot...")
+        except Exception as e:
+            print(f"⚠️ [HEARTBEAT] Error en verificación: {e}")
+
+
+async def run_bot_supervisor():
+    """24/7 auto-reconnecting supervisor loop that guarantees the bot never stays down."""
+    global bot_global
+    retry_delay = 5
+    max_delay = 60
+
+    while True:
+        try:
+            print("🤖 [SUPERVISOR 24/7] Conectando Discord Bot...")
+            try:
+                bot_global = build_bot(enable_message_content=True)
+                await bot_global.start(BOT_TOKEN)
+            except discord.errors.PrivilegedIntentsRequired:
+                print("ℹ️ [SUPERVISOR 24/7] Privileged Intents no activos. Iniciando Bot con Slash Commands y Botones...")
+                bot_global = build_bot(enable_message_content=False)
+                await bot_global.start(BOT_TOKEN)
+
+        except discord.errors.LoginFailure as e:
+            print(f"❌ [CRÍTICO 24/7] Error de login en Discord (Token inválido): {e}. Reintentando en 60s...")
+            await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            print("🛑 [SUPERVISOR 24/7] Supervisor de Discord detenido.")
+            break
+        except Exception as e:
+            print(f"⚠️ [SUPERVISOR 24/7] Conexión de Discord interrumpida ({type(e).__name__}: {e}). Reconectando automáticamente en {retry_delay}s...")
+            await asyncio.sleep(retry_delay)
+            retry_delay = min(int(retry_delay * 1.5), max_delay)
+        else:
+            print("ℹ️ [SUPERVISOR 24/7] Conexión de Discord finalizada limpiamente. Reconectando en 5s...")
+            await asyncio.sleep(5)
+            retry_delay = 5
+
+
 # ----------------- MAIN RUNNER (CONCURRENT WEB + BOT) -----------------
 async def main():
-    global bot_global
     # 1. Start Web Server
     web_app = create_web_app()
     runner = web.AppRunner(web_app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', PORT)
     await site.start()
-    print(f"🌐 Servidor Web Rodriguez LawnCare escuchando en http://0.0.0.0:{PORT}")
+    print(f"🌐 Servidor Web Rodriguez LawnCare activo 24/7 en http://0.0.0.0:{PORT}")
 
-    # 2. Start Discord Bot
-    try:
-        print("🤖 Iniciando Discord Bot con Message Content Intent...")
-        bot_global = build_bot(enable_message_content=True)
-        await bot_global.start(BOT_TOKEN)
-    except discord.errors.PrivilegedIntentsRequired:
-        print("ℹ️ Iniciando Bot en modo Slash Commands (/subir, /fotos, /eliminar) y Botones...")
-        bot_global = build_bot(enable_message_content=False)
-        await bot_global.start(BOT_TOKEN)
-    except Exception as e:
-        print(f"Error en Discord Bot: {e}")
-        while True:
-            await asyncio.sleep(3600)
+    # 2. Start Keepalive Heartbeat Task
+    asyncio.create_task(keepalive_heartbeat())
+
+    # 3. Start Resilient 24/7 Discord Bot Supervisor Loop
+    await run_bot_supervisor()
 
 
 if __name__ == "__main__":

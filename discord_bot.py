@@ -814,17 +814,22 @@ def build_bot(enable_message_content: bool):
     return bot
 
 
-# ----------------- MAIN RUNNER WITH FALLBACK -----------------
+# ----------------- MAIN RUNNER WITH FALLBACK & AUTO-RECONNECT -----------------
 if __name__ == "__main__":
-    try:
-        print("🤖 Intentando conectar con Message Content Intent activado...")
-        bot = build_bot(enable_message_content=True)
-        bot.run(BOT_TOKEN)
-    except discord.errors.PrivilegedIntentsRequired:
-        print("\n" + "="*60)
-        print("ℹ️ AVISO: 'Message Content Intent' aún no está activado en:")
-        print(f"👉 https://discord.com/developers/applications/{APP_ID}/bot")
-        print("Iniciando automáticamente con Slash Commands (/subir, /fotos, /eliminar) y Botones...")
-        print("="*60 + "\n")
-        bot = build_bot(enable_message_content=False)
-        bot.run(BOT_TOKEN)
+    import time
+    while True:
+        try:
+            print("🤖 [24/7] Conectando Discord Bot...")
+            try:
+                bot = build_bot(enable_message_content=True)
+                bot.run(BOT_TOKEN)
+            except discord.errors.PrivilegedIntentsRequired:
+                print("ℹ️ Iniciando automáticamente con Slash Commands y Botones...")
+                bot = build_bot(enable_message_content=False)
+                bot.run(BOT_TOKEN)
+        except (KeyboardInterrupt, SystemExit):
+            print("Bot detenido por el usuario.")
+            break
+        except Exception as e:
+            print(f"⚠️ Conexión interrumpida: {e}. Reconectando en 10s...")
+            time.sleep(10)
