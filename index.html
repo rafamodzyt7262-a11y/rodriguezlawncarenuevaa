@@ -1034,23 +1034,20 @@
   <div class="modal-overlay" id="confirmationModal">
     <div class="modal-card">
       <button class="modal-close-btn" id="modalCloseCross" aria-label="Close">&times;</button>
-      <div class="modal-icon">✓</div>
-      <h3 class="modal-title" data-i18n="modal_title">Request Ready to Send!</h3>
-      <p class="modal-desc" data-i18n="modal_desc">
-        We've gathered your details. Click below to send your request directly to Rodriguez LawnCare at (254) 612-1399.
+      <div class="modal-icon" style="background: #16a34a; color: #fff; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1rem;">✓</div>
+      <h3 class="modal-title" data-i18n="modal_title" style="color: #0f172a; font-size: 1.4rem; font-weight: 800; text-align: center;">Estimate Request Received!</h3>
+      <p class="modal-desc" data-i18n="modal_desc" style="color: #64748b; font-size: 0.95rem; line-height: 1.5; text-align: center; margin-bottom: 1.25rem;">
+        Thank you! Your information has been delivered directly to our operations team. We will review your lawn care request and call or text you shortly.
       </p>
 
       <!-- Dynamic Summary of All Details -->
       <div id="modalSummaryContent" class="modal-summary-box"></div>
 
-      <div class="modal-actions">
-        <button type="button" class="btn btn-accent btn-lg" id="whatsappModalBtn" data-i18n="modal_whatsapp_btn">
-          💬 Send Details via WhatsApp to (254) 612-1399
+      <div class="modal-actions" style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <button type="button" class="btn btn-primary btn-lg" id="closeModalOkBtn" style="width: 100%; justify-content: center; font-weight: 700; padding: 0.85rem;" data-i18n="modal_ok_btn">
+          ✓ Got It, Thank You!
         </button>
-        <a href="tel:2548528163" class="btn btn-outline-dark" style="margin-top: 0.25rem;">
-          📞 Or Call 24/7 AI Line at (254) 852-8163
-        </a>
-        <button type="button" id="closeModalBtn" style="color: var(--gray-500); background: none; border: none; font-size: 0.85rem; text-decoration: underline; cursor: pointer; margin-top: 0.5rem;" data-i18n="modal_close">
+        <button type="button" id="closeModalBtn" style="color: var(--gray-500); background: none; border: none; font-size: 0.85rem; text-decoration: underline; cursor: pointer;" data-i18n="modal_close">
           Close window
         </button>
       </div>
@@ -1142,7 +1139,7 @@
   </footer>
 
   <!-- Scripts & Military-Grade Security Shield -->
-  <script src="./js/main.js?v=3.2"></script>
+  <script src="./js/main.js?v=3.3"></script>
   <script src="./js/gallery.js?v=3.2"></script>
   <script src="./security/anti-bot.js" data-security-allow="true"></script>
   <script src="./security/web-shield.js" data-security-allow="true"></script>

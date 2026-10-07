@@ -203,9 +203,9 @@ const translations = {
     srv_opt_junk: 'Junk Removal & Hauling',
 
     // Modal
-    modal_title: 'Request Ready to Send!',
-    modal_desc: 'Your details are ready. Click below to send your request directly to Rodriguez LawnCare at (254) 612-1399.',
-    modal_whatsapp_btn: '💬 Send Details via WhatsApp to (254) 612-1399',
+    modal_title: 'Estimate Request Received!',
+    modal_desc: 'Thank you! Your information has been delivered directly to our operations team. We will review your lawn care request and call or text you shortly.',
+    modal_ok_btn: '✓ Got It, Thank You!',
     modal_close: 'Close window'
   }
 };
@@ -561,8 +561,8 @@ function initBookingForms() {
   const heroForm = document.getElementById('heroQuickForm');
   const modal = document.getElementById('confirmationModal');
   const closeModalBtn = document.getElementById('closeModalBtn');
+  const closeModalOkBtn = document.getElementById('closeModalOkBtn');
   const modalCloseCross = document.getElementById('modalCloseCross');
-  const whatsappModalBtn = document.getElementById('whatsappModalBtn');
   const modalSummaryContent = document.getElementById('modalSummaryContent');
   const dateInput = document.getElementById('formDate');
 
@@ -602,45 +602,25 @@ function initBookingForms() {
       ? data.services
       : [data.service || 'Front & Back Yard Cut'];
 
-    const servicesBullets = servicesList.map(s => `  • ${s}`).join('\n');
-
-    // Build WhatsApp message (100% English)
-    const waText = `🌱 *NEW SERVICE REQUEST - RODRIGUEZ LAWNCARE*
-
-👤 *Name:* ${data.name}
-📱 *Phone:* ${data.phone}
-📍 *Address:* ${data.address}
-📅 *Requested Date:* ${data.date}
-⏰ *Time:* ${data.time}
-🌿 *Requested Services:*
-${servicesBullets}
-🔄 *Frequency:* ${data.frequency}
-📝 *Job Description:*
-"${data.description}"`;
-
-    activeWhatsAppUrl = `https://wa.me/12546121399?text=${encodeURIComponent(waText)}`;
-
-    // Render detailed visual summary in modal (100% English)
+    // Render detailed visual summary in modal
     if (modalSummaryContent) {
       const pillsHtml = servicesList.map(s => `<span class="service-pill-tag">✓ ${s}</span>`).join('');
       modalSummaryContent.innerHTML = `
         <div class="modal-summary-row"><span class="modal-summary-label">👤 Customer:</span> <span class="modal-summary-val">${data.name}</span></div>
         <div class="modal-summary-row"><span class="modal-summary-label">📱 Phone:</span> <span class="modal-summary-val">${data.phone}</span></div>
-        <div class="modal-summary-row"><span class="modal-summary-label">📍 Address:</span> <span class="modal-summary-val">${data.address}</span></div>
-        <div class="modal-summary-row"><span class="modal-summary-label">📅 Date:</span> <span class="modal-summary-val">${data.date}</span></div>
-        <div class="modal-summary-row"><span class="modal-summary-label">⏰ Time:</span> <span class="modal-summary-val">${data.time}</span></div>
+        ${data.address && data.address !== 'To be confirmed by call/text' && data.address !== 'Por coordinar por llamada/mensaje' ? `<div class="modal-summary-row"><span class="modal-summary-label">📍 Address:</span> <span class="modal-summary-val">${data.address}</span></div>` : ''}
         <div class="modal-summary-row" style="align-items: flex-start;">
           <span class="modal-summary-label">🌿 Services:</span>
           <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 65%; justify-content: flex-end;">${pillsHtml}</div>
         </div>
-        <div class="modal-summary-row" style="flex-direction: column; gap: 0.25rem;">
-          <span class="modal-summary-label">📝 Description:</span>
-          <span class="modal-summary-val" style="text-align: left; font-style: italic; background: #fff; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0;">"${data.description}"</span>
+        <div style="margin-top: 0.85rem; padding: 0.75rem 1rem; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; font-size: 0.88rem; color: #166534; display: flex; align-items: center; gap: 8px; text-align: left;">
+          <span style="font-size: 1.25rem;">🟢</span>
+          <span><strong>Request Sent!</strong> We have received your request in our dispatch logs and will call or text you shortly.</span>
         </div>
       `;
     }
 
-    // Instantly notify Discord Bot via /api/lead
+    // Instantly notify Discord Bot via /api/lead (Channel: 1557306528078237706)
     try {
       fetch('/api/lead', {
         method: 'POST',
@@ -648,16 +628,13 @@ ${servicesBullets}
         body: JSON.stringify(data)
       })
       .then(res => res.json())
-      .then(res => console.log('Lead forwarded to Discord:', res))
+      .then(res => console.log('Lead forwarded to Discord logs channel:', res))
       .catch(err => console.warn('Lead notification error:', err));
     } catch (e) {
       console.warn('Fetch lead failed:', e);
     }
 
-    // Automatically trigger WhatsApp in new tab so owner receives it immediately
-    window.open(activeWhatsAppUrl, '_blank');
-
-    // Show modal on screen
+    // Show confirmation modal on screen (NO WhatsApp or external app popup)
     if (modal) {
       modal.classList.add('open');
     }
@@ -740,18 +717,11 @@ ${servicesBullets}
   }
 
   if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+  if (closeModalOkBtn) closeModalOkBtn.addEventListener('click', closeModal);
   if (modalCloseCross) modalCloseCross.addEventListener('click', closeModal);
   if (modal) {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
-    });
-  }
-
-  // WhatsApp Button inside Modal
-  if (whatsappModalBtn) {
-    whatsappModalBtn.addEventListener('click', () => {
-      window.open(activeWhatsAppUrl, '_blank');
-      closeModal();
     });
   }
 }
