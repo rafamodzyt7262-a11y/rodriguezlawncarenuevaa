@@ -550,6 +550,11 @@ def build_bot(enable_message_content: bool):
 
 
 # ----------------- WEB SERVER (AIOHTTP) -----------------
+async def handle_index(request):
+    """Serves the main website homepage."""
+    index_path = os.path.join(BASE_DIR, "index.html")
+    return web.FileResponse(index_path)
+
 async def handle_gallery_json(request):
     """Serves gallery.json with no-cache headers so visitors always see live photos."""
     gallery = load_gallery()
@@ -560,9 +565,11 @@ async def handle_gallery_json(request):
 
 def create_web_app():
     app = web.Application()
+    app.router.add_get('/', handle_index)
+    app.router.add_get('/index.html', handle_index)
     app.router.add_get('/gallery.json', handle_gallery_json)
-    # Static files
-    app.router.add_static('/', path=BASE_DIR, show_index=True)
+    # Static files (CSS, JS, Assets)
+    app.router.add_static('/', path=BASE_DIR, show_index=False)
     return app
 
 
