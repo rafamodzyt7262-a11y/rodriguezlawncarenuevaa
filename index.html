@@ -268,6 +268,42 @@
         </p>
       </div>
 
+      <!-- Gallery Category Filters -->
+      <div class="gallery-filter-wrap">
+        <div class="gallery-filter-bar" id="galleryFilterBar" role="tablist">
+          <button class="gallery-filter-btn active" data-filter="all" role="tab" aria-selected="true">
+            <span class="filter-icon">🌟</span>
+            <span class="filter-label" data-i18n="filter_all">All Projects</span>
+            <span class="filter-count" id="countAll">0</span>
+          </button>
+          <button class="gallery-filter-btn" data-filter="Front Yard" role="tab" aria-selected="false">
+            <span class="filter-icon">🏡</span>
+            <span class="filter-label" data-i18n="filter_front">Front Yard</span>
+            <span class="filter-count" id="countFront">0</span>
+          </button>
+          <button class="gallery-filter-btn" data-filter="Back Yard" role="tab" aria-selected="false">
+            <span class="filter-icon">🌿</span>
+            <span class="filter-label" data-i18n="filter_back">Back Yard</span>
+            <span class="filter-count" id="countBack">0</span>
+          </button>
+          <button class="gallery-filter-btn" data-filter="Mulch" role="tab" aria-selected="false">
+            <span class="filter-icon">🪵</span>
+            <span class="filter-label" data-i18n="filter_mulch">Mulch</span>
+            <span class="filter-count" id="countMulch">0</span>
+          </button>
+          <button class="gallery-filter-btn" data-filter="Tree Care" role="tab" aria-selected="false">
+            <span class="filter-icon">🌳</span>
+            <span class="filter-label" data-i18n="filter_tree">Tree Care</span>
+            <span class="filter-count" id="countTree">0</span>
+          </button>
+          <button class="gallery-filter-btn" data-filter="Other" role="tab" aria-selected="false">
+            <span class="filter-icon">✂️</span>
+            <span class="filter-label" data-i18n="filter_other">Cleanups & More</span>
+            <span class="filter-count" id="countShrubs">0</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Gallery Grid Container (populated dynamically from gallery.json) -->
       <div class="gallery-grid" id="galleryGrid">
         <!-- Dynamic Cards Inserted Here by js/gallery.js -->

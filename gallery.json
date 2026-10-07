@@ -4,20 +4,23 @@
     "filename": "work_2.jpg",
     "url": "./assets/gallery/work_2.jpg",
     "uploaded_at": 1791331200000,
-    "title": "Full Lawn Renovation & Edging"
+    "title": "Front Yard Renovation & Razor Edging",
+    "category": "Front Yard"
   },
   {
     "id": 3,
     "filename": "work_3.jpg",
     "url": "./assets/gallery/work_3.jpg",
     "uploaded_at": 1790900000000,
-    "title": "Hedge Trimming & Shrub Shaping"
+    "title": "Hedge Trimming & Shrub Shaping",
+    "category": "Shrubs & Bushes"
   },
   {
     "id": 4,
     "filename": "work_4.jpg",
     "url": "./assets/gallery/work_4.jpg",
     "uploaded_at": 1790900000000,
-    "title": "Fresh Dark Mulch Installation"
+    "title": "Fresh Dark Mulch Installation",
+    "category": "Mulch"
   }
 ]

@@ -81,6 +81,96 @@ def get_next_id(gallery):
     return max(item.get("id", 0) for item in gallery) + 1
 
 
+# ----------------- JOB CATEGORIES & PRESETS -----------------
+JOB_PRESETS = {
+    "front": {
+        "category": "Front Yard",
+        "icon": "🏡",
+        "default_title": "Front Yard Clean & Sharp Mowing"
+    },
+    "back": {
+        "category": "Back Yard",
+        "icon": "🌿",
+        "default_title": "Back Yard Mowing & Clean Lines"
+    },
+    "mulch": {
+        "category": "Mulch",
+        "icon": "🪵",
+        "default_title": "Fresh Dark Mulch Installation"
+    },
+    "tree": {
+        "category": "Tree Care",
+        "icon": "🌳",
+        "default_title": "Tree Care & Precision Trimming"
+    },
+    "bush": {
+        "category": "Shrubs & Bushes",
+        "icon": "✂️",
+        "default_title": "Hedge Trimming & Shrub Shaping"
+    },
+    "clean": {
+        "category": "Yard Cleanups",
+        "icon": "🧹",
+        "default_title": "Property Cleanup & Debris Removal"
+    },
+    "edge": {
+        "category": "Edging & Stripes",
+        "icon": "📐",
+        "default_title": "Precision Sidewalk Edging"
+    },
+    "mow": {
+        "category": "Lawn Mowing",
+        "icon": "🌱",
+        "default_title": "Commercial Stripe Lawn Mowing"
+    }
+}
+
+KEYWORD_MAPPINGS = [
+    (["front", "frente", "delantero", "delantera", "frontyard", "porch"], "front"),
+    (["back", "trasero", "trasera", "atras", "backyard", "patio trasero"], "back"),
+    (["mulch", "mulching", "acolchado", "corteza", "bark"], "mulch"),
+    (["tree", "trees", "arbol", "arboles", "rama", "ramas", "poda"], "tree"),
+    (["bush", "bushes", "shrub", "shrubs", "hedge", "hedges", "arbusto", "arbustos", "seto", "setos"], "bush"),
+    (["clean", "cleanup", "limpieza", "junk", "debris", "hojas", "leaf", "leaves", "escombros"], "clean"),
+    (["edge", "edging", "orilla", "orillas", "filo", "sidewalk", "banqueta"], "edge"),
+    (["mow", "mowing", "corte", "zacate", "pasto", "cesped", "lawn", "grass"], "mow"),
+]
+
+def parse_job_details(text: str):
+    """Detects category, icon, and formatted title from user text or keyword."""
+    if not text or not text.strip():
+        return {
+            "category": "General LawnCare",
+            "icon": "🌱",
+            "title": "Trabajo de Lawn Care"
+        }
+    clean = text.strip()
+    low = clean.lower()
+
+    for kw_list, preset_key in KEYWORD_MAPPINGS:
+        if any(kw in low for kw in kw_list):
+            preset = JOB_PRESETS[preset_key]
+            # If user typed just a short word like "front", "mulch", "tree"
+            if len(clean) <= 12 or clean.lower() in [k for k in kw_list]:
+                return {
+                    "category": preset["category"],
+                    "icon": preset["icon"],
+                    "title": preset["default_title"]
+                }
+            # Otherwise, keep custom details capitalized
+            return {
+                "category": preset["category"],
+                "icon": preset["icon"],
+                "title": clean[0].upper() + clean[1:]
+            }
+
+    return {
+        "category": "General LawnCare",
+        "icon": "✨",
+        "title": clean[0].upper() + clean[1:]
+    }
+
+
 # ----------------- DISCORD LOGGING HELPER -----------------
 async def send_discord_log(bot_instance, title: str, description: str, color=discord.Color.blue(), image_url=None):
     """Sends a real-time activity log directly to the Discord channel."""
@@ -102,7 +192,182 @@ async def send_discord_log(bot_instance, title: str, description: str, color=dis
         print(f"[Error enviando log a Discord]: {e}")
 
 
-# ----------------- DISCORD UI VIEWS & MENUS -----------------
+# ----------------- DISCORD MODALS & UI VIEWS -----------------
+class CustomJobModal(discord.ui.Modal, title="Nombre del Trabajo"):
+    job_name = discord.ui.TextInput(
+        label="¿Qué trabajo se realizó?",
+        placeholder="Ej: Front yard, Mulch nuevo, Podado de árboles...",
+        min_length=2,
+        max_length=90,
+        required=True
+    )
+
+    def __init__(self, item_ids: list, bot_ref=None):
+        super().__init__()
+        self.item_ids = item_ids if isinstance(item_ids, list) else [item_ids]
+        self.bot_ref = bot_ref
+
+    async def on_submit(self, interaction: discord.Interaction):
+        custom_text = self.job_name.value.strip()
+        details = parse_job_details(custom_text)
+        gallery = load_gallery()
+
+        updated_count = 0
+        for item in gallery:
+            if item.get("id") in self.item_ids:
+                item["title"] = details["title"]
+                item["category"] = details["category"]
+                updated_count += 1
+
+        if updated_count > 0:
+            save_gallery(gallery)
+            embed = discord.Embed(
+                title="✅ ¡Trabajo Asignado con Éxito!",
+                description=(
+                    f"📸 **Foto(s):** `#{', #'.join(str(i) for i in self.item_ids)}`\n"
+                    f"🏷️ **Nombre:** `{details['icon']} {details['title']}`\n"
+                    f"📂 **Categoría Web:** `{details['category']}`\n\n"
+                    f"🌐 *Ya se actualizó en tu página web en tiempo real.*"
+                ),
+                color=discord.Color.green()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=False)
+
+            if self.bot_ref:
+                await send_discord_log(
+                    self.bot_ref,
+                    title="📋 [REGISTRO EN VIVO] • ✏️ Foto(s) Renombrada(s)",
+                    description=(
+                        f"• **Foto(s):** `#{', #'.join(str(i) for i in self.item_ids)}`\n"
+                        f"• **Nombre:** *{details['title']}*\n"
+                        f"• **Categoría:** `{details['category']}`\n"
+                        f"• **Estado web:** 🟢 Actualizado en vivo"
+                    ),
+                    color=discord.Color.green()
+                )
+        else:
+            await interaction.response.send_message("❌ No se encontró la foto para actualizar.", ephemeral=True)
+
+
+class JobCategoryPickerView(discord.ui.View):
+    def __init__(self, item_ids: list, bot_ref=None):
+        super().__init__(timeout=None)
+        self.item_ids = item_ids if isinstance(item_ids, list) else [item_ids]
+        self.bot_ref = bot_ref
+
+    async def apply_preset(self, interaction: discord.Interaction, key: str):
+        details = JOB_PRESETS[key]
+        gallery = load_gallery()
+        updated = 0
+        for item in gallery:
+            if item.get("id") in self.item_ids:
+                item["title"] = details["default_title"]
+                item["category"] = details["category"]
+                updated += 1
+
+        if updated > 0:
+            save_gallery(gallery)
+            embed = discord.Embed(
+                title="✅ ¡Trabajo Asignado a la Web!",
+                description=(
+                    f"📸 **Foto(s):** `#{', #'.join(str(i) for i in self.item_ids)}`\n"
+                    f"🏷️ **Nombre:** `{details['icon']} {details['default_title']}`\n"
+                    f"📂 **Categoría Web:** `{details['category']}`\n\n"
+                    f"🌐 *Visible al instante en tu página web.*"
+                ),
+                color=discord.Color.green()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=False)
+
+            if self.bot_ref:
+                await send_discord_log(
+                    self.bot_ref,
+                    title="📋 [REGISTRO EN VIVO] • 🏷️ Categoría de Foto Asignada",
+                    description=(
+                        f"• **Foto(s):** `#{', #'.join(str(i) for i in self.item_ids)}`\n"
+                        f"• **Trabajo:** `{details['icon']} {details['default_title']}`\n"
+                        f"• **Categoría Web:** `{details['category']}`"
+                    ),
+                    color=discord.Color.green()
+                )
+        else:
+            await interaction.response.send_message("⚠️ Foto no encontrada en la web.", ephemeral=True)
+
+    @discord.ui.button(label="Front Yard", emoji="🏡", style=discord.ButtonStyle.primary, row=0)
+    async def btn_front(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.apply_preset(interaction, "front")
+
+    @discord.ui.button(label="Back Yard", emoji="🌿", style=discord.ButtonStyle.primary, row=0)
+    async def btn_back(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.apply_preset(interaction, "back")
+
+    @discord.ui.button(label="Mulch", emoji="🪵", style=discord.ButtonStyle.success, row=0)
+    async def btn_mulch(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.apply_preset(interaction, "mulch")
+
+    @discord.ui.button(label="Tree Care", emoji="🌳", style=discord.ButtonStyle.success, row=1)
+    async def btn_tree(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.apply_preset(interaction, "tree")
+
+    @discord.ui.button(label="Arbustos", emoji="✂️", style=discord.ButtonStyle.secondary, row=1)
+    async def btn_bush(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.apply_preset(interaction, "bush")
+
+    @discord.ui.button(label="Limpieza", emoji="🧹", style=discord.ButtonStyle.secondary, row=1)
+    async def btn_clean(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.apply_preset(interaction, "clean")
+
+    @discord.ui.button(label="Escribir Otro Nombre...", emoji="✏️", style=discord.ButtonStyle.secondary, row=2)
+    async def btn_custom(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(CustomJobModal(self.item_ids, self.bot_ref))
+
+
+class RenameSelect(discord.ui.Select):
+    def __init__(self, gallery, bot_ref):
+        self.bot_ref = bot_ref
+        options = []
+        for item in gallery[-25:]:
+            cat = item.get("category", "General")
+            title = item.get("title", "Trabajo")[:40]
+            options.append(
+                discord.SelectOption(
+                    label=f"Foto #{item['id']} ({cat})",
+                    description=title,
+                    value=str(item["id"]),
+                    emoji="🏷️"
+                )
+            )
+        super().__init__(
+            placeholder="Selecciona la foto a la que deseas cambiar nombre...",
+            min_values=1,
+            max_values=1,
+            options=options
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        photo_id = int(self.values[0])
+        gallery = load_gallery()
+        found_item = next((item for item in gallery if item.get("id") == photo_id), None)
+        if not found_item:
+            await interaction.response.send_message(f"❌ La foto #{photo_id} no existe.", ephemeral=True)
+            return
+
+        view = JobCategoryPickerView([photo_id], self.bot_ref)
+        msg = (
+            f"✏️ **Cambiando nombre a la Foto #{photo_id}**\n"
+            f"• **Título actual:** *{found_item.get('title', 'Sin título')}*\n"
+            f"• **Categoría actual:** `{found_item.get('category', 'General')}`\n\n"
+            f"👇 **Selecciona el nuevo trabajo o escribe un nombre personalizado:**"
+        )
+        await interaction.response.send_message(msg, view=view, ephemeral=True)
+
+
+class RenameView(discord.ui.View):
+    def __init__(self, gallery, bot_ref):
+        super().__init__(timeout=60)
+        self.add_item(RenameSelect(gallery, bot_ref))
+
+
 class DeleteSelect(discord.ui.Select):
     def __init__(self, gallery, bot_ref):
         self.bot_ref = bot_ref
@@ -111,7 +376,8 @@ class DeleteSelect(discord.ui.Select):
             now = int(time.time() * 1000)
             is_new = (now - item.get("uploaded_at", 0)) < THREE_DAYS_MS
             status_text = "NEW" if is_new else "Normal"
-            title_preview = item.get('title', 'Trabajo')[:45]
+            cat = item.get("category", "Trabajo")
+            title_preview = f"[{cat}] {item.get('title', 'Trabajo')}"[:45]
             options.append(
                 discord.SelectOption(
                     label=f"Foto #{item['id']} ({status_text})",
@@ -164,6 +430,7 @@ class DeleteSelect(discord.ui.Select):
             description=(
                 f"• **Foto removida:** `#{photo_id}`\n"
                 f"• **Título anterior:** *{found_item.get('title', 'Trabajo')}*\n"
+                f"• **Categoría:** `{found_item.get('category', 'General')}`\n"
                 f"• **Total restante en la web:** **{len(gallery)} fotos**\n"
                 f"• **Estado web:** 🟢 Cambios aplicados en tiempo real."
             ),
@@ -205,9 +472,9 @@ class ControlPanelView(discord.ui.View):
             else:
                 tag = f"`#{pid}` (Normal)"
 
-            date_str = time.strftime("%d/%m/%Y %H:%M", time.localtime(up_time / 1000)) if up_time else "Reciente"
+            cat = item.get("category", "General")
             title = item.get("title", "Trabajo en Killeen")
-            lines.append(f"• **Foto #{pid}** • {tag}\n  ↳ *{title}* (Subida: {date_str})")
+            lines.append(f"• **Foto #{pid}** • {tag} • `[{cat}]`\n  ↳ *{title}*")
 
         embed = discord.Embed(
             title="📸 Estado de la Galería en Vivo",
@@ -224,6 +491,15 @@ class ControlPanelView(discord.ui.View):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    @discord.ui.button(label="Cambiar Nombre / Trabajo", style=discord.ButtonStyle.primary, emoji="✏️", custom_id="btn_rename_photo")
+    async def rename_photo_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        gallery = load_gallery()
+        if not gallery:
+            await interaction.response.send_message("ℹ️ No hay fotos en la web para renombrar.", ephemeral=True)
+            return
+        view = RenameView(gallery, self.bot_ref)
+        await interaction.response.send_message("Selecciona la foto a la que deseas cambiar el nombre o categoría:", view=view, ephemeral=True)
+
     @discord.ui.button(label="Eliminar Foto", style=discord.ButtonStyle.danger, emoji="🗑️", custom_id="btn_delete_photo")
     async def delete_photo_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         gallery = load_gallery()
@@ -237,9 +513,14 @@ class ControlPanelView(discord.ui.View):
     async def help_upload_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         msg = (
             "**¡Es súper fácil subir fotos a tu web desde tu celular!** 🚀\n\n"
-            "**1.** Adjunta de **1 a 5 fotos** en este canal y envíalas.\n"
-            "**2.** O usa el comando `/subir` con la foto y descripción opcional.\n\n"
-            "✨ *El servidor en la nube las publica al instante con la insignia `🔥 NEW` por 3 días (72h). No necesitas abrir tu computadora para nada.*"
+            "**1. Escribe el trabajo al adjuntar la foto:**\n"
+            "   Al mandar la foto en este canal escribe: `front`, `back`, `mulch`, `tree`, etc.\n"
+            "   El bot le asignará automáticamente el nombre y categoría en tu web.\n\n"
+            "**2. O mándala sin texto:**\n"
+            "   El bot te responderá al instante con botones fáciles `[Front Yard]` `[Back Yard]` `[Mulch]` `[Tree Care]` para que toques el que hiciste con un solo dedo.\n\n"
+            "**3. Con comando `/subir`:**\n"
+            "   Escribe `/subir`, adjunta la foto y elige la categoría en la lista desplegable.\n\n"
+            "✨ *El servidor en la nube las publica al instante con la insignia `🔥 NEW` por 3 días (72h).*"
         )
         await interaction.response.send_message(msg, ephemeral=True)
 
@@ -259,7 +540,7 @@ def build_bot(enable_message_content: bool):
         print("==================================================")
         print(f"Rodriguez LawnCare Bot conectado como: {bot.user}")
         print(f"Server ID: {SERVER_ID} | Canal ID: {CHANNEL_ID}")
-        print(f"Message Content Intent: {'ACTIVADO' if enable_message_content else 'DESACTIVADO (Usa /subir)'}")
+        print(f"Message Content Intent: {'ACTIVADO' if enable_message_content else 'DESACTIVADO (Usa /subir o Botones)'}")
         print("==================================================")
 
         try:
@@ -294,8 +575,9 @@ def build_bot(enable_message_content: bool):
                         "📍 **Cobertura:** `Killeen, Harker Heights, Copperas Cove & Belton, TX`\n"
                         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
                         "⚡ **¿CÓMO FUNCIONA?**\n"
-                        "• **📤 Subir Trabajos:** Envía de **1 a 5 fotos** en este chat desde tu móvil o usa `/subir`.\n"
-                        "• **🔥 Etiqueta NEW:** Tus fotos aparecerán con brillo **`🔥 NEW`** por 3 días.\n"
+                        "• **📤 Subir Trabajos:** Envía de **1 a 5 fotos** en este chat con el nombre (`front`, `back`, `mulch`, `tree`) o usa `/subir`.\n"
+                        "• **🏷️ Botones Rápidos:** Si mandas la foto sola, toca los botones `[Front]` `[Back]` `[Mulch]` `[Tree]` para nombrarla al instante.\n"
+                        "• **✏️ Renombrar:** Puedes cambiarle el nombre a cualquier foto con **Cambiar Nombre / Trabajo** o `/renombrar`.\n"
                         "• **🗑️ Borrar Trabajos:** Presiona **Eliminar Foto** o usa el comando `/eliminar`.\n"
                     ),
                     color=discord.Color.from_rgb(22, 163, 74)
@@ -327,6 +609,7 @@ def build_bot(enable_message_content: bool):
                     f"• **Servidor Web:** 🟢 Activo en puerto `{PORT}`\n"
                     f"• **Bot de Discord:** 🟢 Escuchando eventos en tiempo real\n"
                     f"• **Fotos en la Web:** `{len(gallery)} fotos activas`\n"
+                    f"• **Categorías:** Front Yard, Back Yard, Mulch, Tree Care, etc.\n"
                     f"• **Modo:** 100% Autónomo (no requiere PC encendida)"
                 ),
                 color=discord.Color.green()
@@ -355,6 +638,10 @@ def build_bot(enable_message_content: bool):
             await message.reply("⚠️ **Límite:** Puedes subir un máximo de **5 fotos a la vez**. Por favor envía hasta 5 fotos.")
             return
 
+        raw_caption = message.content.strip() if message.content else ""
+        has_caption = bool(raw_caption)
+        parsed_caption = parse_job_details(raw_caption) if has_caption else None
+
         processing_msg = await message.reply(f"⏳ Procesando y publicando {len(image_attachments)} foto(s) en tu página web...")
 
         gallery = load_gallery()
@@ -377,13 +664,20 @@ def build_bot(enable_message_content: bool):
                                 f.write(content)
 
                             now_ms = int(time.time() * 1000)
-                            title_text = message.content.strip() if message.content.strip() else f"Trabajo Real #{next_id}"
+                            if parsed_caption:
+                                item_title = parsed_caption["title"]
+                                item_cat = parsed_caption["category"]
+                            else:
+                                item_title = f"Trabajo Real #{next_id}"
+                                item_cat = "General LawnCare"
+
                             item = {
                                 "id": next_id,
                                 "filename": filename,
                                 "url": f"./assets/gallery/{filename}",
                                 "uploaded_at": now_ms,
-                                "title": title_text
+                                "title": item_title,
+                                "category": item_cat
                             }
                             gallery.append(item)
                             uploaded_items.append(item)
@@ -392,29 +686,48 @@ def build_bot(enable_message_content: bool):
 
         save_gallery(gallery)
 
-        embed = discord.Embed(
-            title="✅ ¡Fotos Publicadas en la Web con Éxito!",
-            description=f"Se agregaron **{len(uploaded_items)} foto(s)** a tu galería en tiempo real:\n\n",
-            color=discord.Color.green()
-        )
+        uploaded_ids = [i["id"] for i in uploaded_items]
+        picker_view = JobCategoryPickerView(uploaded_ids, bot)
 
-        for item in uploaded_items:
-            embed.description += f"• 📸 **Foto #{item['id']}** • Etiqueta `🔥 NEW` activa por **3 días** (72 horas)\n"
+        if parsed_caption:
+            embed = discord.Embed(
+                title="✅ ¡Fotos Publicadas en la Web con Éxito!",
+                description=(
+                    f"Se agregaron **{len(uploaded_items)} foto(s)** a tu galería en tiempo real:\n\n"
+                    f"🏷️ **Trabajo Asignado:** `{parsed_caption['icon']} {parsed_caption['title']}`\n"
+                    f"📂 **Categoría Web:** `{parsed_caption['category']}`\n"
+                    f"🔥 **Etiqueta:** `🔥 NEW` activa por **3 días** (72 horas)\n\n"
+                    f"*(Si deseas cambiar el trabajo o nombre de estas fotos, toca un botón abajo)*"
+                ),
+                color=discord.Color.green()
+            )
+        else:
+            embed = discord.Embed(
+                title="📸 ¡Fotos Subidas a la Web!",
+                description=(
+                    f"Se agregaron **{len(uploaded_items)} foto(s)** (`#{', #'.join(str(i) for i in uploaded_ids)}`) con etiqueta `🔥 NEW`.\n\n"
+                    f"👇 **¿Qué trabajo realizaste?** Toca un botón para que el nombre y categoría aparezcan en tu página web:"
+                ),
+                color=discord.Color.blue()
+            )
 
-        embed.set_footer(text="Abre tu página web y verás las fotos publicadas al instante.")
+        embed.set_footer(text="Rodriguez LawnCare • Galería en Vivo")
         if uploaded_items:
             embed.set_image(url=image_attachments[0].url)
 
-        await processing_msg.edit(content=None, embed=embed)
+        await processing_msg.edit(content=None, embed=embed, view=picker_view)
 
         # Send activity log
         ids_str = ", ".join(f"#{i['id']}" for i in uploaded_items)
+        log_title = parsed_caption["title"] if parsed_caption else "Trabajo Reciente"
+        log_cat = parsed_caption["category"] if parsed_caption else "General"
         await send_discord_log(
             bot,
             title="📋 [REGISTRO EN VIVO] • 📥 Nuevas Fotos Agregadas a la Web",
             description=(
                 f"• **Fotos agregadas:** `{len(uploaded_items)}`\n"
                 f"• **IDs asignados:** `{ids_str}`\n"
+                f"• **Trabajo:** *{log_title}* (`{log_cat}`)\n"
                 f"• **Etiqueta activa:** `🔥 NEW` (72 horas)\n"
                 f"• **Total en la web:** **{len(gallery)} fotos**\n"
                 f"• **Origen:** Subido desde celular/Discord"
@@ -441,13 +754,33 @@ def build_bot(enable_message_content: bool):
         for item in gallery:
             is_new = (now - item.get("uploaded_at", 0)) < THREE_DAYS_MS
             status = "🔥 **NEW**" if is_new else f"`#{item['id']}`"
-            embed.description += f"• **Foto #{item['id']}** ({status}) - *{item.get('title', 'Trabajo')}*\n"
+            cat = item.get("category", "General")
+            embed.description += f"• **Foto #{item['id']}** ({status}) - `[{cat}]` *{item.get('title', 'Trabajo')}*\n"
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @bot.tree.command(name="subir", description="Subir una foto a la página web")
-    @app_commands.describe(foto="Selecciona la foto de tu trabajo para subir a la web", titulo="Título opcional del trabajo")
-    async def cmd_subir(interaction: discord.Interaction, foto: discord.Attachment, titulo: str = ""):
+    @bot.tree.command(name="subir", description="Subir una foto a la página web con su trabajo y nombre")
+    @app_commands.describe(
+        foto="Selecciona la foto de tu trabajo para subir a la web",
+        trabajo="Tipo de trabajo realizado (Front Yard, Mulch, Tree, etc.)",
+        nombre_personalizado="Nombre o detalle opcional del trabajo (ej: Casa en Belton, Mulch oscuro...)"
+    )
+    @app_commands.choices(trabajo=[
+        app_commands.Choice(name="🏡 Front Yard (Frente)", value="front"),
+        app_commands.Choice(name="🌿 Back Yard (Patio Trasero)", value="back"),
+        app_commands.Choice(name="🪵 Mulch Installation (Mulch)", value="mulch"),
+        app_commands.Choice(name="🌳 Tree Care & Trimming (Árboles)", value="tree"),
+        app_commands.Choice(name="✂️ Hedge & Bush Trimming (Arbustos)", value="bush"),
+        app_commands.Choice(name="🧹 Yard Cleanup & Debris (Limpieza)", value="clean"),
+        app_commands.Choice(name="🌱 Lawn Mowing & Edging (Corte)", value="mow"),
+        app_commands.Choice(name="✏️ Personalizado (Escribe en 'nombre_personalizado')", value="custom"),
+    ])
+    async def cmd_subir(
+        interaction: discord.Interaction,
+        foto: discord.Attachment,
+        trabajo: app_commands.Choice[str] = None,
+        nombre_personalizado: str = ""
+    ):
         if not (foto.content_type and foto.content_type.startswith("image/")) and not foto.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
             await interaction.response.send_message("❌ El archivo adjunto debe ser una imagen (JPG, PNG o WEBP).", ephemeral=True)
             return
@@ -470,27 +803,56 @@ def build_bot(enable_message_content: bool):
                         f.write(content)
 
         now_ms = int(time.time() * 1000)
-        title_val = titulo.strip() if titulo.strip() else f"Trabajo Real #{next_id}"
+
+        # Determine category and title
+        if nombre_personalizado.strip():
+            details = parse_job_details(nombre_personalizado.strip())
+            # If user also selected a specific choice other than custom, override category
+            if trabajo and trabajo.value != "custom" and trabajo.value in JOB_PRESETS:
+                details["category"] = JOB_PRESETS[trabajo.value]["category"]
+                details["icon"] = JOB_PRESETS[trabajo.value]["icon"]
+        elif trabajo and trabajo.value != "custom" and trabajo.value in JOB_PRESETS:
+            preset = JOB_PRESETS[trabajo.value]
+            details = {
+                "category": preset["category"],
+                "icon": preset["icon"],
+                "title": preset["default_title"]
+            }
+        else:
+            preset = JOB_PRESETS["front"]
+            details = {
+                "category": preset["category"],
+                "icon": preset["icon"],
+                "title": preset["default_title"]
+            }
+
         item = {
             "id": next_id,
             "filename": filename,
             "url": f"./assets/gallery/{filename}",
             "uploaded_at": now_ms,
-            "title": title_val
+            "title": details["title"],
+            "category": details["category"]
         }
         gallery.append(item)
         save_gallery(gallery)
 
+        picker_view = JobCategoryPickerView([next_id], bot)
+
         embed = discord.Embed(
             title="✅ ¡Foto Publicada en la Web!",
-            description=f"📸 **Foto #{next_id}** agregada a tu página web.\nEtiqueta `🔥 NEW` activa durante los próximos **3 días**.",
+            description=(
+                f"📸 **Foto #{next_id}** agregada con éxito a tu página web.\n"
+                f"🏷️ **Trabajo:** `{details['icon']} {details['title']}`\n"
+                f"📂 **Categoría Web:** `{details['category']}`\n"
+                f"🔥 **Insignia:** `🔥 NEW` activa durante los próximos **3 días**."
+            ),
             color=discord.Color.green()
         )
-        embed.add_field(name="Título", value=title_val, inline=True)
         embed.set_image(url=foto.url)
         embed.set_footer(text="Rodriguez LawnCare Live Web Gallery")
 
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed, view=picker_view)
 
         # Log
         await send_discord_log(
@@ -498,12 +860,59 @@ def build_bot(enable_message_content: bool):
             title="📋 [REGISTRO EN VIVO] • 📥 Foto Subida vía /subir",
             description=(
                 f"• **Foto:** `#{next_id}`\n"
-                f"• **Título:** *{title_val}*\n"
+                f"• **Trabajo:** *{details['title']}*\n"
+                f"• **Categoría:** `{details['category']}`\n"
                 f"• **Etiqueta activa:** `🔥 NEW` (72 horas)\n"
                 f"• **Total en web:** **{len(gallery)} fotos**"
             ),
             color=discord.Color.green(),
             image_url=foto.url
+        )
+
+    @bot.tree.command(name="renombrar", description="Cambiar el nombre o categoría de una foto en la web")
+    @app_commands.describe(
+        numero="El número de la foto que deseas renombrar (ej. 2, 3, 4)",
+        nuevo_nombre="Nuevo nombre o categoría (ej. front, mulch, tree, o nombre personalizado)"
+    )
+    async def cmd_renombrar(interaction: discord.Interaction, numero: int, nuevo_nombre: str):
+        gallery = load_gallery()
+        found_item = next((item for item in gallery if item.get("id") == numero), None)
+
+        if not found_item:
+            await interaction.response.send_message(f"❌ No se encontró ninguna foto con el número **#{numero}** en tu web.", ephemeral=True)
+            return
+
+        details = parse_job_details(nuevo_nombre)
+        old_title = found_item.get("title", "Sin título")
+        old_cat = found_item.get("category", "General")
+
+        found_item["title"] = details["title"]
+        found_item["category"] = details["category"]
+        save_gallery(gallery)
+
+        embed = discord.Embed(
+            title="✅ ¡Foto Renombrada en la Web!",
+            description=(
+                f"📸 **Foto #{numero}** actualizada con éxito:\n\n"
+                f"🏷️ **Nuevo Nombre:** `{details['icon']} {details['title']}`\n"
+                f"📂 **Nueva Categoría:** `{details['category']}`\n\n"
+                f"*(Antes: [{old_cat}] {old_title})*\n"
+                f"🌐 *Ya se ve reflejado en tu página web en tiempo real.*"
+            ),
+            color=discord.Color.green()
+        )
+        await interaction.response.send_message(embed=embed)
+
+        await send_discord_log(
+            bot,
+            title="📋 [REGISTRO EN VIVO] • ✏️ Foto Renombrada vía /renombrar",
+            description=(
+                f"• **Foto:** `#{numero}`\n"
+                f"• **Nuevo Nombre:** *{details['title']}*\n"
+                f"• **Categoría:** `{details['category']}`\n"
+                f"• **Total en web:** **{len(gallery)} fotos**"
+            ),
+            color=discord.Color.green()
         )
 
     @bot.tree.command(name="eliminar", description="Eliminar una foto de tu página web por su número")

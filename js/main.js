@@ -60,6 +60,17 @@ const translations = {
     ba_after_2: '90-degree crisp sidewalk edging & blown clean',
     ba_after_3: 'Fresh rich dark mulch & precision trimmed shrubs',
 
+    // Live Gallery & Category Filters
+    gallery_badge: 'Live Project Feed',
+    gallery_title: 'Real Work in Killeen & Central Texas',
+    gallery_sub: 'Fresh snapshots directly from our active job sites. Photos with the <strong style="color: #16a34a;">🔥 NEW</strong> badge were finished within the last 3 days!',
+    filter_all: 'All Projects',
+    filter_front: 'Front Yard',
+    filter_back: 'Back Yard',
+    filter_mulch: 'Mulch',
+    filter_tree: 'Tree Care',
+    filter_other: 'Cleanups & More',
+
     // Calculator
     calc_badge: 'Transparent Pricing',
     calc_title: 'Instant Online Lawn Quote Calculator',
