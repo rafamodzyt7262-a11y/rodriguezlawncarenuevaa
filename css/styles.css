@@ -462,10 +462,17 @@ button, input, select, textarea {
   z-index: 1;
 }
 
-.hero-bg-media img {
+.hero-bg-media img,
+.hero-bg-media video {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.hero-bg-media img {
   transform: scale(1.03);
   animation: subtleZoom 20s infinite alternate ease-in-out;
 }
